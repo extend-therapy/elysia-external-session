@@ -4,6 +4,7 @@ import {
   RedisStore,
   SessionHandler,
   type BaseSession,
+  type SessionHandlerConfig,
 } from "../src";
 import Elysia, { type Context } from "elysia";
 
@@ -27,6 +28,7 @@ const requiresSessionWithUser = (ctx: any) => {
 
 const app = new Elysia();
 const redisClient = new RedisClient("redis://redis:6379");
+const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
 app
   .use(
     SessionPlugin({

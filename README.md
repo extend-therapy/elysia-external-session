@@ -23,6 +23,34 @@ Check out the [example](/example) directory to see how to use the store (or exte
 
 If you want to just run the example, use the [docker compose yaml](/docker-compose.yml) via `docker compose up` or `podman compose up`. The compose file also starts a redis service and links to it interal to the docker host.
 
+## Simple Usage
+Make sure the types passed to your  below matches the name of your interface above. You don't have to use `RedisStore`. You can make your own. [See below](#extending-the-store-and-session). 
+
+```{typescript}
+const interface SimpleSession extends BaseSession {
+  anyInfo: any
+}
+
+export type BasicSessionHandler = SessionHandler<
+  SimpleSession,
+  RedisStore<SimpleSession>
+>;
+
+
+const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
+  name: "session_whatnot",
+  store: new RedisStore<SimpleSession>({
+    cookieName: "sessionexamplev1",
+    expireAfter: 60 * 60 * 24 * 30,
+    redisClient: redisClient,
+  })
+}
+
+const app = new Elysia().use(SessionPlugin(config))
+
+```
+
+
 ## Extending the Store and Session
 
 There's are some type constraints on the BaseStore and BaseSession, so make sure you understand them before you extend them. Check how it was done in the example.
