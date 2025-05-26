@@ -29,14 +29,12 @@ export class RedisStore<T> extends BaseStore<T> {
       redisExpireAfter <= 2147483647
         ? redisExpireAfter
         : 60 * 60 * 6; // redis expiration time in seconds - 6 hours - TODO: make it
-    console.log("redisExpireAfter:", this.redisExpireAfter);
     if (!this.redis) {
       throw new Error("Failed to create a RedisStore");
     }
   }
 
   async get<T>({ sessionId }: { sessionId: string }) {
-    console.log("GET sessionId:", sessionId);
     await this.redis.connect();
     const sessionString: string | null = await this.redis.get(
       `session:${sessionId}`
@@ -44,7 +42,6 @@ export class RedisStore<T> extends BaseStore<T> {
     // extend the session expiration time
     if (sessionString) {
       await this.redis.expire(`session:${sessionId}`, this.expireAfter);
-      console.log("sessionString in redis.ts IS:", sessionString);
       return JSON.parse(sessionString) as unknown as T;
     }
     return null;

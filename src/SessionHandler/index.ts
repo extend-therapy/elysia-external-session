@@ -1,3 +1,4 @@
+import SessionPlugin, { SessionPluginError } from "..";
 import { Encryption } from "../Encryption";
 import type { BaseStore } from "../Store/base";
 
@@ -29,8 +30,19 @@ export class SessionHandler<T extends BaseSession, U extends BaseStore<T>> {
       };
   protected sessionStore: U;
 
-  // Simplified wrapper for sessionStore.create that creates a uuid and encrypts it and returns it
+  /**
+   * Simplified wrapper for sessionStore.create that creates a uuid and encrypts it and returns it
+   * @param session - The session object to create
+   * @returns {Promise<string>} The sessionId encrypted
+   */
   public createSession: (session: T) => Promise<string>; // returns sessionId
+
+  /**
+   * Wrapper for sessionStore.delete that deletes the session and returns a cookie string
+   * @param sessionId - The sessionId to delete
+   * @returns A cookie string that clears the session with the cookie name
+   */
+  public deleteSessionAndClearCookie: (sessionId: string) => Promise<string>; // returns cookie string
 
   // Wrapper for encryptionHandler.decrypt that decrypts the sessionId and returns it
   public getSessionId: (sessionId: string) => Promise<string | null>; // returns sessionId or null
@@ -65,7 +77,7 @@ export class SessionHandler<T extends BaseSession, U extends BaseStore<T>> {
       this.encryptionHandler = new Encryption();
     }
     if (!this.encryptionHandler) {
-      throw new Error("Encryption is not set");
+      throw new SessionPluginError("Encryption is not set");
     }
     this.sessionStore = config.store;
     this.getSession = this.sessionStore.get.bind(this.sessionStore);
@@ -78,6 +90,10 @@ export class SessionHandler<T extends BaseSession, U extends BaseStore<T>> {
       );
       await this.sessionStore.create({ sessionId, session });
       return encryptedSessionId;
+    };
+    this.deleteSessionAndClearCookie = async (sessionId: string) => {
+      await this.deleteSession({ sessionId });
+      return this.sessionStore.resetCookie();
     };
     this.getSessionId = async (sessionId: string) => {
       return this.encryptionHandler.decrypt(sessionId);

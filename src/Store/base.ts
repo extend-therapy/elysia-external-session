@@ -8,6 +8,7 @@ export abstract class BaseStore<T> {
   protected cookieName: string;
   protected expireAfter: number;
   public createCookieString: (encryptedSessionId: string) => string;
+  public resetCookie: () => string;
 
   constructor({
     cookieName = "session",
@@ -22,6 +23,10 @@ export abstract class BaseStore<T> {
         new Date(),
         this.expireAfter
       ).toUTCString()}`;
+    this.resetCookie = () =>
+      `${
+        this.cookieName
+      }=; Path=/; HttpOnly; SameSite=Strict; Expires=${formatISO(new Date(0))}`;
   }
 
   async create({

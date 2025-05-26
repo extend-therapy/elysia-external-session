@@ -3,6 +3,14 @@ import crypto from "crypto";
 const SALT_LENGTH = 16;
 const IV_LENGTH = 12;
 
+export class EncryptionError extends Error {
+  public readonly name = "EncryptionError";
+  constructor(message: string, cause?: Error) {
+    super(message);
+    this.cause = cause;
+  }
+}
+
 export class Encryption {
   private key: Buffer<ArrayBuffer>;
   private algorithm: crypto.CipherGCMTypes;
@@ -37,42 +45,35 @@ export class Encryption {
   }
 
   async decrypt(value: string) {
-    try {
-      const encryptedData = Buffer.from(value, "hex");
-      const iv = encryptedData.subarray(0, IV_LENGTH);
-      const encrypted = encryptedData.subarray(
-        IV_LENGTH,
-        encryptedData.length - 16
-      );
-      const tag = encryptedData.subarray(encryptedData.length - 16);
+    const encryptedData = Buffer.from(value, "hex");
+    const iv = encryptedData.subarray(0, IV_LENGTH);
+    const encrypted = encryptedData.subarray(
+      IV_LENGTH,
+      encryptedData.length - 16
+    );
+    const tag = encryptedData.subarray(encryptedData.length - 16);
 
-      if (iv.length !== IV_LENGTH) {
-        throw new Error("Invalid IV length");
-      }
-      if (encrypted.length !== encryptedData.length - IV_LENGTH - 16) {
-        throw new Error("Invalid encrypted data length");
-      }
-      if (tag.length !== 16) {
-        throw new Error("Invalid tag length");
-      }
-
-      const decipher = crypto.createDecipheriv(this.algorithm, this.key, iv, {
-        authTagLength: 16,
-      });
-
-      decipher.setAuthTag(tag);
-
-      const decrypted = Buffer.concat([
-        decipher.update(encrypted),
-        decipher.final(),
-      ]);
-
-      return decrypted.toString("utf-8");
-    } catch (error) {
-      if (error instanceof Error) {
-        console.log("error:", error.message);
-      }
-      return null;
+    if (iv.length !== IV_LENGTH) {
+      throw new EncryptionError("Invalid IV length");
     }
+    if (encrypted.length !== encryptedData.length - IV_LENGTH - 16) {
+      throw new EncryptionError("Invalid encrypted data length");
+    }
+    if (tag.length !== 16) {
+      throw new EncryptionError("Invalid tag length");
+    }
+
+    const decipher = crypto.createDecipheriv(this.algorithm, this.key, iv, {
+      authTagLength: 16,
+    });
+
+    decipher.setAuthTag(tag);
+
+    const decrypted = Buffer.concat([
+      decipher.update(encrypted),
+      decipher.final(),
+    ]);
+
+    return decrypted.toString("utf-8");
   }
 }

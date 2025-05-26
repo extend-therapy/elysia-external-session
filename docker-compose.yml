@@ -13,16 +13,8 @@ services:
     develop:
       watch:
         - action: sync
-          path: ./
-          target: /app/
-          ignore:
-            - .git
-            - .env
-            - .DS_Store
-            - .idea
-            - .vscode
-            - .gitignore
-            - node_modules
+          path: ./src
+          target: /app/src
     ports:
       - 3000:3000
     depends_on:

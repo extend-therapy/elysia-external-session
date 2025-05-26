@@ -1,8 +1,11 @@
 import { env, RedisClient } from "bun";
-import { SessionHandler, type BaseSession } from "../src/SessionHandler";
-import { RedisStore } from "../src/Store/redis";
+import {
+  default as SessionPlugin,
+  RedisStore,
+  SessionHandler,
+  type BaseSession,
+} from "../src";
 import Elysia, { type Context } from "elysia";
-import session from "../src";
 
 interface SimpleSession extends BaseSession {
   user: any | undefined;
@@ -26,7 +29,7 @@ const app = new Elysia();
 const redisClient = new RedisClient("redis://redis:6379");
 app
   .use(
-    session({
+    SessionPlugin({
       name: "sessionexamplev1",
       store: new RedisStore<SimpleSession>({
         cookieName: "sessionexamplev1",
@@ -77,10 +80,9 @@ app
         sessionHandler: MySessionHandler;
       }
     ) => {
-      await ctx.sessionHandler.deleteSession({
-        sessionId: ctx.sessionId,
-      });
       ctx.set.status = 200;
+      ctx.set.headers["Set-Cookie"] =
+        await ctx.sessionHandler.deleteSessionAndClearCookie(ctx.sessionId);
       return { success: "Logged out" };
     }
   );
