@@ -26,7 +26,7 @@ If you want to just run the example, use the [docker compose yaml](/docker-compo
 ## Simple Usage
 Make sure the types passed to your  below matches the name of your interface above. You don't have to use `RedisStore`. You can make your own. [See below](#extending-the-store-and-session). 
 
-```{typescript}
+```ts
 const interface SimpleSession extends BaseSession {
   anyInfo: any
 }
