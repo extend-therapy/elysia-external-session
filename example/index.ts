@@ -1,4 +1,4 @@
-import { env, RedisClient } from "bun";
+import Redis from "ioredis";
 import {
   default as SessionPlugin,
   RedisStore,
@@ -31,14 +31,13 @@ const requiresSessionWithUser = (ctx: any) => {
 };
 
 const app = new Elysia();
-const redisClient = new RedisClient("redis://redis:6379");
 
 const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
   name: "sessionexamplev1",
   store: new RedisStore<SimpleSession>({
     cookieName: "sessionexamplev1",
     expireAfter: 60 * 60 * 24 * 30,
-    redisClient: redisClient,
+    redisUrl: Bun.env.REDIS_URL ?? "redis://redis:6379",
   }),
 };
 
@@ -90,6 +89,6 @@ app
     }
   );
 
-const port = parseInt(env.PORT ?? "3000");
+const port = parseInt(Bun.env.PORT ?? "3000");
 app.listen(!isNaN(port) ? port : 3000);
 console.log("Listening on port", port);

@@ -1,41 +1,43 @@
-import { RedisClient, type RedisOptions } from "bun";
+import Redis from "ioredis";
+import type { RedisOptions } from "ioredis";
 import { BaseStore, type SessionOptions } from "./base";
 
 export interface RedisStoreOptions extends SessionOptions {
-  redisClient?: RedisClient;
+  redisClient?: Redis;
   redisOptions?: RedisOptions;
   redisUrl?: string;
   redisExpireAfter?: number;
 }
 
 export class RedisStore<T> extends BaseStore<T> {
-  private redis: RedisClient;
+  private redis: Redis;
   private redisExpireAfter: number;
 
   constructor(options: RedisStoreOptions) {
     super(options);
     const { redisClient, redisOptions, redisUrl, redisExpireAfter } = options;
-    if (!redisClient && !redisUrl) {
+    if (redisClient) {
+      this.redis = redisClient;
+    } else if (redisUrl) {
+      this.redis = new Redis(redisUrl);
+    } else {
       throw new Error(
-        "options with (redisClient) or (redisUrl) is required to create a RedisStore"
+        "RedisStore options with (redisClient) or (redisUrl) is required to create a RedisStore"
       );
     }
-    this.redis =
-      redisClient ?? new RedisClient(redisUrl, { ...(redisOptions ?? {}) });
 
     this.redisExpireAfter =
       typeof redisExpireAfter === "number" &&
       redisExpireAfter >= 0 &&
       redisExpireAfter <= 2147483647
         ? redisExpireAfter
-        : 60 * 60 * 6; // redis expiration time in seconds - 6 hours - TODO: make it
+        : 60 * 60 * 6; // redis expiration time in seconds - 6 hours
     if (!this.redis) {
       throw new Error("Failed to create a RedisStore");
     }
   }
 
   async get<T>({ sessionId }: { sessionId: string }) {
-    await this.redis.connect();
     const sessionString: string | null = await this.redis.get(
       `session:${sessionId}`
     );
