@@ -66,7 +66,11 @@ export class SessionHandler<T extends BaseSession, U extends BaseStore<T>> {
     sessionId: string;
   }) => Promise<boolean>; // returns true if session was deleted, false if not found
 
-  // from session
+  /**
+   * Wrapper for sessionStore.createCookieString that creates a cookie string
+   * @param sessionId {string} - The sessionId to create a cookie string for
+   * @returns {string} A cookie string that sets the sessionId
+   */
   public createCookieString: (sessionId: string) => string;
 
   constructor(private config: SessionHandlerConfig<T, U>) {
