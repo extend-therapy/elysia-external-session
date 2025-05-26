@@ -4,7 +4,7 @@
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
-A Typescript (Bun-specific!!!) plugin for Elysia.js that makes using sessions on Redis easier. It uses the Bun-native [Bun.RedisClient](https://bun.sh/docs/api/redis) rather than any external dependency so you must be using Bun at least 1.2.9 (when Bun.RedisClient was released).
+A Typescript (Bun-specific!!!) plugin for Elysia.js that makes using sessions on Redis easier. While I wanted to use the Bun-native RedisClient, it seemed to have connection issues with rediss TLS servers that dont provide certificates. Any help to use that and allow upstash Redis to be used would be fantastic.
 
 This is only a typescript package and can be installed by using
 

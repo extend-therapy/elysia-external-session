@@ -57,6 +57,7 @@ export class RedisStore<T> extends BaseStore<T> {
   }
 
   async delete({ sessionId }: { sessionId: string }) {
+    console.log("deleting session", sessionId);
     await this.redis.del(`session:${sessionId}`);
     return true;
   }

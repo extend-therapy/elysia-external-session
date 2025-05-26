@@ -28,7 +28,7 @@ const SessionPlugin = <T, U extends BaseStore<T>>(
         sessionId: undefined,
         session: null,
       };
-      if (!cookie || request.method === "GET") {
+      if (!cookie) {
         return sessionReturn;
       }
 

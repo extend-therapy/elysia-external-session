@@ -15,6 +15,9 @@ services:
         - action: sync
           path: ./src
           target: /app/src
+        - action: sync
+          path: ./example
+          target: /app/example
     ports:
       - 3000:3000
     depends_on:

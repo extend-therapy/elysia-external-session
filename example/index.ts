@@ -6,6 +6,7 @@ import {
   type SessionHandlerConfig,
 } from "../src";
 import Elysia, { type Context } from "elysia";
+import { moduleRouter } from "./moduleRouter";
 
 // This doesn't have to extend anything anymore - it just has to be JSON serializable
 // What does that mean?
@@ -87,7 +88,8 @@ app
         await ctx.sessionHandler.deleteSessionAndClearCookie(ctx.sessionId);
       return { success: true, message: "Logged out" };
     }
-  );
+  )
+  .use(moduleRouter);
 
 const port = parseInt(Bun.env.PORT ?? "3000");
 app.listen(!isNaN(port) ? port : 3000);
