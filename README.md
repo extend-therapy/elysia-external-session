@@ -26,3 +26,13 @@ If you want to just run the example, use the [docker compose yaml](/docker-compo
 ## Extending the Store and Session
 
 There's are some type constraints on the BaseStore and BaseSession, so make sure you understand them before you extend them. Check how it was done in the example.
+
+
+## Using your own Encryption/Decryption routines
+
+Instead of using the aes-256-CGM, you can supply in your config an encrypt and decrypt method of your choosing as long as they match the types from Encryption's encrypt and decrypt routines. They can use anything as long as they produce/take strings.
+
+
+## The methods may throw (and are not caught)
+
+Because how you choose to handle errors varies and how you choose to handle logging. Errors are thrown from the Encryption class with the `EncryptionError` class type (exported) and `SessionPluginError` from most everywhere else.
