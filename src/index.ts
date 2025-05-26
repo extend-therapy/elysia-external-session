@@ -1,5 +1,5 @@
 import { Elysia } from "elysia";
-import type { BaseStore } from "./store/base";
+import type { BaseStore } from "./Store/base";
 import type { BaseSession } from "./SessionHandler";
 import type { SessionHandlerConfig } from "./SessionHandler";
 import { SessionHandler } from "./SessionHandler";

@@ -1,5 +1,5 @@
-import { Encryption } from "../Encryption";
-import type { BaseStore } from "../store/base";
+import { Encryption } from "../../Encryption";
+import type { BaseStore } from "../Store/base";
 
 export interface BaseSession {
   shouldSetCookie?: boolean;

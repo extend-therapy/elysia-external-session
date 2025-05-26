@@ -1,8 +1,8 @@
 import { env, RedisClient } from "bun";
-import { SessionHandler, type BaseSession } from "../SessionHandler";
-import { RedisStore } from "../store/redis";
+import { SessionHandler, type BaseSession } from "../src/SessionHandler";
+import { RedisStore } from "../src/Store/redis";
 import Elysia, { type Context } from "elysia";
-import session from "..";
+import session from "../src";
 
 interface SimpleSession extends BaseSession {
   user: any | undefined;
