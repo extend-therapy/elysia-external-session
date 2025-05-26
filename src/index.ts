@@ -1,9 +1,15 @@
 import { Elysia } from "elysia";
 import type { BaseStore } from "./Store/base";
-import type { BaseSession } from "./SessionHandler";
-import type { SessionHandlerConfig } from "./SessionHandler";
-import { SessionHandler } from "./SessionHandler";
-import { RedisStore } from "./Store/redis";
+import {
+  SessionHandler,
+  type BaseSession,
+  type SessionHandlerConfig,
+} from "./SessionHandler";
+
+export { BaseStore } from "./Store/base";
+export type { BaseSession, SessionHandlerConfig } from "./SessionHandler";
+export { SessionHandler } from "./SessionHandler";
+export { RedisStore } from "./Store/redis";
 
 export class SessionPluginError extends Error {
   public readonly name = "SessionPluginError";
@@ -67,11 +73,3 @@ const SessionPlugin = <T extends BaseSession, U extends BaseStore<T>>(
       }
     );
 export default SessionPlugin;
-
-export {
-  SessionHandler,
-  type BaseSession,
-  type BaseStore,
-  type SessionHandlerConfig,
-  RedisStore,
-};
