@@ -48,7 +48,7 @@ export class RedisStore<T> extends BaseStore<T> {
   }
 
   async set<T>({ sessionId, session }: { sessionId?: string; session: T }) {
-    // create and update use this method - unencrypted sessionId passed in
+    // unencrypted sessionId passed in
     const sessionString = JSON.stringify(session);
     await this.redis.set(`session:${sessionId}`, sessionString);
     await this.redis.expire(`session:${sessionId}`, this.redisExpireAfter);

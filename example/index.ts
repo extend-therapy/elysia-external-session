@@ -3,12 +3,16 @@ import {
   default as SessionPlugin,
   RedisStore,
   SessionHandler,
-  type BaseSession,
   type SessionHandlerConfig,
 } from "../src";
 import Elysia, { type Context } from "elysia";
 
-interface SimpleSession extends BaseSession {
+// This doesn't have to extend anything anymore - it just has to be JSON serializable
+// What does that mean?
+// Example: If you include a Date or function in your session object, then it will not be simply JSON serializable
+// Instead use timestamps or other simple data types (Objects as values are generally ok as long as they do not contain functions or dates)
+// This is generally the case for redis - but if you create your own store that can store these things, then it's up to you
+interface SimpleSession {
   user: any | undefined;
 }
 
@@ -22,12 +26,13 @@ const requiresSessionWithUser = (ctx: any) => {
   if (!ctx.session?.user) {
     console.log("Unauthorized");
     ctx.set.status = 401;
-    return "Unauthorized";
+    return { success: false, message: "Unauthorized" };
   }
 };
 
 const app = new Elysia();
 const redisClient = new RedisClient("redis://redis:6379");
+
 const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
   name: "sessionexamplev1",
   store: new RedisStore<SimpleSession>({
@@ -36,6 +41,7 @@ const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
     redisClient: redisClient,
   }),
 };
+
 app
   .use(SessionPlugin(config))
   .get("/", (ctx) => {
@@ -43,12 +49,9 @@ app
   })
   .post(
     "/triedauthenticated",
-
     (ctx: Context & { session: SimpleSession; sessionId: string }) => {
       // Should not get here if called before login
-      console.log("authenticated", ctx.session);
-      ctx.set.status = 200;
-      return { success: "You may access this page" };
+      return { success: true, message: "You may access this page" };
     },
     {
       beforeHandle: requiresSessionWithUser,
@@ -59,16 +62,16 @@ app
     async (
       ctx: Context & {
         session: SimpleSession;
-        sessionId: string;
         sessionHandler: MySessionHandler;
       }
     ) => {
       ctx.session = { user: { name: "John Doe" } } as SimpleSession;
-      await ctx.sessionHandler.setSession({
-        sessionId: ctx.sessionId,
+      const encryptedSessionId = await ctx.sessionHandler.createSession({
         session: ctx.session,
       });
-      return "Logged in";
+      ctx.set.headers["Set-Cookie"] =
+        ctx.sessionHandler.createCookieString(encryptedSessionId);
+      return { success: true, message: "Logged in" };
     }
   )
   .post(
@@ -83,7 +86,7 @@ app
       ctx.set.status = 200;
       ctx.set.headers["Set-Cookie"] =
         await ctx.sessionHandler.deleteSessionAndClearCookie(ctx.sessionId);
-      return { success: "Logged out" };
+      return { success: true, message: "Logged out" };
     }
   );
 

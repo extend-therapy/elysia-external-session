@@ -1,6 +1,6 @@
 # elysia-redis-session
 
-**version: 0.0.1**
+**version: 0.0.3**
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
@@ -27,7 +27,7 @@ If you want to just run the example, use the [docker compose yaml](/docker-compo
 Make sure the types passed to your  below matches the name of your interface above. You don't have to use `RedisStore`. You can make your own. [See below](#extending-the-store-and-session). 
 
 ```ts
-const interface SimpleSession extends BaseSession {
+const interface SimpleSession {
   anyInfo: any
 }
 
@@ -51,10 +51,15 @@ const app = new Elysia().use(SessionPlugin(config))
 ```
 
 
-## Extending the Store and Session
+## Extending the Store
 
-There's are some type constraints on the BaseStore and BaseSession, so make sure you understand them before you extend them. Check how it was done in the example.
+There's are some type constraints on the BaseStore, so make sure you understand them before you extend them. Check how it was done in the example.
 
+## Creating a session type/interface
+
+For RedisStore, if you include a Date or function in your session object, then it will not be simply JSON serializable
+Instead use timestamps or other simple data types (Objects as values are generally ok as long as they do not contain functions or dates)
+This is generally the case for most session structures - but if you create your own store that can handle these things, then it's up to you
 
 ## Using your own Encryption/Decryption routines
 

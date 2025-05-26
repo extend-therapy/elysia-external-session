@@ -29,18 +29,10 @@ export abstract class BaseStore<T> {
       }=; Path=/; HttpOnly; SameSite=Strict; Expires=${formatISO(new Date(0))}`;
   }
 
-  async create({
-    session,
-    sessionId,
-  }: {
-    session: T;
-    sessionId: string;
-  }): Promise<void> {
-    await this.set({ sessionId, session });
-  }
-
+  // Gets the session data
   abstract get<T>({ sessionId }: { sessionId: string }): Promise<T | null>;
 
+  // Sets or creates the session data. SessionHandler has a wrapper for this for createSession that also creates a sessionId
   abstract set<T>({
     sessionId,
     session,
@@ -49,5 +41,6 @@ export abstract class BaseStore<T> {
     session: T;
   }): Promise<void>;
 
+  // Deletes the session data returns true if session was deleted, false if not found
   abstract delete({ sessionId }: { sessionId: string }): Promise<boolean>;
 }

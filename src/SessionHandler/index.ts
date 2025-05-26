@@ -2,17 +2,13 @@ import SessionPlugin, { SessionPluginError } from "..";
 import { Encryption } from "../Encryption";
 import type { BaseStore } from "../Store/base";
 
-export interface BaseSession {
-  shouldSetCookie?: boolean;
-}
-
 /**
  * @description SessionConfig is a type that defines the configuration for a session. You can create your own type to pass in.
- * @template T - The type of the session. For example some interaface like: `interface WeakSession extends BaseSession { sessionId: string, user: {name: string}, importantInfo: any }`
+ * @template T - The type of the session. For example some interaface like: `interface WeakSession { sessionId: string, user: {name: string}, importantInfo: any }`
  * @template U - The type of the store. For example `RedisStore<WeakSession>`
  */
 export interface SessionHandlerConfig<
-  T extends BaseSession = BaseSession,
+  T,
   U extends BaseStore<T> = BaseStore<T>
 > {
   name?: string;
@@ -21,7 +17,7 @@ export interface SessionHandlerConfig<
   decrypt?: (value: string) => Promise<string | null>;
 }
 
-export class SessionHandler<T extends BaseSession, U extends BaseStore<T>> {
+export class SessionHandler<T, U extends BaseStore<T>> {
   protected encryptionHandler:
     | Encryption
     | {
@@ -32,10 +28,10 @@ export class SessionHandler<T extends BaseSession, U extends BaseStore<T>> {
 
   /**
    * Simplified wrapper for sessionStore.create that creates a uuid and encrypts it and returns it
-   * @param session - The session object to create
+   * @param session - The session object to create. This is passed in to allow for the session to be created with the sessionId already set.
    * @returns {Promise<string>} The sessionId encrypted
    */
-  public createSession: (session: T) => Promise<string>; // returns sessionId
+  public createSession: ({ session }: { session: T }) => Promise<string>; // returns sessionId
 
   /**
    * Wrapper for sessionStore.delete that deletes the session and returns a cookie string
@@ -87,12 +83,12 @@ export class SessionHandler<T extends BaseSession, U extends BaseStore<T>> {
     this.getSession = this.sessionStore.get.bind(this.sessionStore);
     this.setSession = this.sessionStore.set.bind(this.sessionStore);
     this.deleteSession = this.sessionStore.delete.bind(this.sessionStore);
-    this.createSession = async (session: T) => {
+    this.createSession = async ({ session }: { session: T }) => {
       const sessionId = Bun.randomUUIDv7();
       const encryptedSessionId = await this.encryptionHandler.encrypt(
         sessionId
       );
-      await this.sessionStore.create({ sessionId, session });
+      await this.sessionStore.set({ sessionId, session });
       return encryptedSessionId;
     };
     this.deleteSessionAndClearCookie = async (sessionId: string) => {
