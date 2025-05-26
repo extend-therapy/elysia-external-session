@@ -29,17 +29,15 @@ const requiresSessionWithUser = (ctx: any) => {
 const app = new Elysia();
 const redisClient = new RedisClient("redis://redis:6379");
 const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
+  name: "sessionexamplev1",
+  store: new RedisStore<SimpleSession>({
+    cookieName: "sessionexamplev1",
+    expireAfter: 60 * 60 * 24 * 30,
+    redisClient: redisClient,
+  }),
+};
 app
-  .use(
-    SessionPlugin({
-      name: "sessionexamplev1",
-      store: new RedisStore<SimpleSession>({
-        cookieName: "sessionexamplev1",
-        expireAfter: 60 * 60 * 24 * 30,
-        redisClient: redisClient,
-      }),
-    })
-  )
+  .use(SessionPlugin(config))
   .get("/", (ctx) => {
     return `Hello World no session ${ctx.sessionId}`;
   })
