@@ -1,4 +1,4 @@
-import { Encryption } from "../../Encryption";
+import { Encryption } from "../Encryption";
 import type { BaseStore } from "../Store/base";
 
 export interface BaseSession {
