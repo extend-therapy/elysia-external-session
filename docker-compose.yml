@@ -1,0 +1,29 @@
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - 6379:6379
+    volumes:
+      - ./redis_data:/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: bun --hot run example/index.ts
+    develop:
+      watch:
+        - action: sync
+          path: ./
+          target: /app/
+          ignore:
+            - .git
+            - .env
+            - .DS_Store
+            - .idea
+            - .vscode
+            - .gitignore
+            - node_modules
+    ports:
+      - 3000:3000
+    depends_on:
+      - redis
