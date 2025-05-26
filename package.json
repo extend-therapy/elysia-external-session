@@ -6,10 +6,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eselkin/elysia-redis-session.git"
+    "url": "https://github.com/extend-therapy/elysia-redis-session.git"
   },
-  "module": "src/index.ts",
   "main": "src/index.ts",
+  "files": [
+    "src"
+  ],
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
