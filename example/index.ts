@@ -48,7 +48,7 @@ app
     return `Hello World no session ${ctx.sessionId}`;
   })
   .post(
-    "/triedauthenticated",
+    "/auth",
     (ctx: Context & { session: SimpleSession; sessionId: string }) => {
       // Should not get here if called before login
       return { success: true, message: "You may access this page" };

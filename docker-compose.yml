@@ -1,10 +1,10 @@
 services:
-  redis:
-    image: redis:latest
-    ports:
-      - 6379:6379
-    volumes:
-      - ./redis_data:/data
+  # redis:
+  #   image: redis:latest
+  #   ports:
+  #     - 6379:6379
+  #   volumes:
+  #     - ./redis_data:/data
   app:
     build:
       context: .
@@ -12,15 +12,18 @@ services:
     command: bun --hot run example/index.ts
     develop:
       watch:
-        - action: sync
+        - action: rebuild
           path: ./src
           target: /app/src
-        - action: sync
+        - action: rebuild
           path: ./example
           target: /app/example
+        - action: sync+restart
+          path: ./.env
+          target: /app/.env
     ports:
       - 3000:3000
-    depends_on:
-      - redis
+    # depends_on:
+    #   - redis
     env_file:
       - .env
