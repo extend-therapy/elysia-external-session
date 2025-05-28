@@ -28,25 +28,29 @@ const SessionPlugin = <T, U extends BaseStore<T>>(
         sessionId: undefined,
         session: null,
       };
-      if (!cookie) {
+      const { sessionId, session } = await sessionHandler.sessionFromCookie(
+        cookie,
+        config.name
+      );
+      if (!sessionId || !session) {
         return sessionReturn;
       }
 
-      const cookieName = config.name ?? "session";
-      const sessionId = cookie[cookieName]?.value;
-
       // This does not catch invalid session ids
-      if (sessionId) {
-        const decryptedSessionId = await sessionHandler.getSessionId(sessionId);
-        if (!decryptedSessionId) {
-          throw new SessionPluginError("Invalid session id");
+
+      return { sessionId, session };
+    })
+    .onAfterHandle(
+      { as: "global" },
+      async ({ request, session, sessionId, set, sessionHandler }) => {
+        // if (request.headers.get("cookie")) {
+        if (session && sessionId) {
+          const cookieString = sessionHandler.createCookieString(
+            await sessionHandler.encrypt(sessionId)
+          );
+          const currentCookie = request.headers.get("cookie");
+          set.headers["Set-Cookie"] = cookieString;
         }
-        const session = await sessionHandler.getSession({
-          sessionId: decryptedSessionId as string,
-        });
-        sessionReturn.sessionId = decryptedSessionId;
-        sessionReturn.session = session;
       }
-      return sessionReturn;
-    });
+    );
 export default SessionPlugin;

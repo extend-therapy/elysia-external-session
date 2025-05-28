@@ -19,7 +19,7 @@ export class RedisStore<T> extends BaseStore<T> {
     if (redisClient) {
       this.redis = redisClient;
     } else if (redisUrl) {
-      this.redis = new Redis(redisUrl);
+      this.redis = new Redis(redisUrl, redisOptions || {});
     } else {
       throw new Error(
         "RedisStore options with (redisClient) or (redisUrl) is required to create a RedisStore"
@@ -41,9 +41,9 @@ export class RedisStore<T> extends BaseStore<T> {
     const sessionString: string | null = await this.redis.get(
       `session:${sessionId}`
     );
-    // extend the session expiration time
+    // extend the session expiration time and return the session object T
     if (sessionString) {
-      await this.redis.expire(`session:${sessionId}`, this.expireAfter);
+      await this.redis.expire(`session:${sessionId}`, this.redisExpireAfter);
       return JSON.parse(sessionString) as unknown as T;
     }
     return null;
@@ -57,7 +57,6 @@ export class RedisStore<T> extends BaseStore<T> {
   }
 
   async delete({ sessionId }: { sessionId: string }) {
-    console.log("deleting session", sessionId);
     await this.redis.del(`session:${sessionId}`);
     return true;
   }

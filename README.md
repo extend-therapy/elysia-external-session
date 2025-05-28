@@ -1,12 +1,12 @@
 # elysia-redis-session
 
-**version: 0.0.3**
+**version: 0.0.5**
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
-A Typescript (Bun-specific!!!) plugin for Elysia.js that makes using sessions on Redis easier. While I wanted to use the Bun-native RedisClient, it seemed to have connection issues with rediss TLS servers that dont provide certificates. Any help to use that and allow upstash Redis to be used would be fantastic.
+A Typescript (Bun-specific!!!) plugin for Elysia.js that makes using sessions on Redis easier. While I wanted to use the Bun-native RedisClient, it does not support clusters yet, so for production use-cases it may be less functional at the moment (i.e. cannot connect to Upstash or various resources that now by default use clusters).
 
-This is only a typescript package and can be installed by using
+This is only a typescript package and can be installed by using:
 
 `bun add github:extend-therapy/elysia-redis-session`
 
@@ -16,7 +16,7 @@ or
 
 You can pin a specific released version or commit with something like:
 
-`bun add github:extend-therapy/elysia-redis-session#v0.0.1`
+`bun add github:extend-therapy/elysia-redis-session#v0.0.5`
 
 ## Examples
 Check out the [example](/example) directory to see how to use the store (or extend one yourself).

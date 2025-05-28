@@ -1,4 +1,3 @@
-import Redis from "ioredis";
 import {
   default as SessionPlugin,
   RedisStore,
@@ -39,6 +38,7 @@ const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
     cookieName: "sessionexamplev1",
     expireAfter: 60 * 60 * 24 * 30,
     redisUrl: Bun.env.REDIS_URL ?? "redis://redis:6379",
+    redisOptions: {},
   }),
 };
 
@@ -69,6 +69,7 @@ app
       const encryptedSessionId = await ctx.sessionHandler.createSession({
         session: ctx.session,
       });
+      console.log({ encryptedSessionId });
       ctx.set.headers["Set-Cookie"] =
         ctx.sessionHandler.createCookieString(encryptedSessionId);
       return { success: true, message: "Logged in" };

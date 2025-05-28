@@ -1,3 +1,4 @@
+import type { Cookie } from "elysia";
 import SessionPlugin, { SessionPluginError } from "..";
 import { Encryption } from "../Encryption";
 import type { BaseStore } from "../Store/base";
@@ -62,6 +63,17 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     sessionId: string;
   }) => Promise<boolean>; // returns true if session was deleted, false if not found
 
+  public sessionFromCookie: (
+    cookie?: Record<string, Cookie<string | undefined>>,
+    name?: string
+  ) => Promise<{
+    sessionId?: string;
+    session?: T;
+  }>;
+
+  public encrypt: (input: string) => Promise<string>;
+  // public decrypt: (sessionId: string) => Promise<string | null>;
+
   /**
    * Wrapper for sessionStore.createCookieString that creates a cookie string
    * @param sessionId {string} - The sessionId to create a cookie string for
@@ -79,6 +91,7 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     if (!this.encryptionHandler) {
       throw new SessionPluginError("Encryption is not set");
     }
+    this.encrypt = this.encryptionHandler.encrypt.bind(this.encryptionHandler);
     this.sessionStore = config.store;
     this.getSession = this.sessionStore.get.bind(this.sessionStore);
     this.setSession = this.sessionStore.set.bind(this.sessionStore);
@@ -101,5 +114,29 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     this.createCookieString = this.sessionStore.createCookieString.bind(
       this.sessionStore
     );
+    this.sessionFromCookie = async (
+      cookie?: Record<string, Cookie<string | undefined>>,
+      name: string = "session"
+    ): Promise<{
+      sessionId?: string;
+      session?: T;
+    }> => {
+      if (!cookie) {
+        return {};
+      }
+
+      const sessionCookie = cookie[name]?.value;
+      if (!sessionCookie) {
+        return {};
+      }
+      const sessionId = await this.getSessionId(sessionCookie);
+      if (!sessionId) {
+        return {};
+      }
+      return {
+        sessionId,
+        session: (await this.getSession({ sessionId })) ?? undefined,
+      };
+    };
   }
 }

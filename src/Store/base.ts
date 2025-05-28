@@ -1,4 +1,4 @@
-import { addMilliseconds, formatISO } from "date-fns";
+import { addHours, formatISO } from "date-fns";
 export interface SessionOptions {
   cookieName?: string;
   expireAfter?: number;
@@ -10,23 +10,20 @@ export abstract class BaseStore<T> {
   public createCookieString: (encryptedSessionId: string) => string;
   public resetCookie: () => string;
 
-  constructor({
-    cookieName = "session",
-    expireAfter = 1000 * 60 * 60 * 24 * 30,
-  }: SessionOptions) {
+  constructor({ cookieName = "session", expireAfter = 5 }: SessionOptions) {
     this.cookieName = cookieName ?? "session";
-    this.expireAfter = expireAfter ?? 1000 * 60 * 60 * 24 * 30; // cookie expiration time in milliseconds
+    this.expireAfter = expireAfter ?? 5; // cookie expiration time - 30 hours
     this.createCookieString = (encryptedSessionId: string) =>
       `${
         this.cookieName
-      }=${encryptedSessionId}; Path=/; HttpOnly; SameSite=Strict; Expires=${addMilliseconds(
+      }=${encryptedSessionId}; Path=/; SameSite=Strict; Expires=${addHours(
         new Date(),
         this.expireAfter
       ).toUTCString()}`;
     this.resetCookie = () =>
-      `${
-        this.cookieName
-      }=; Path=/; HttpOnly; SameSite=Strict; Expires=${formatISO(new Date(0))}`;
+      `${this.cookieName}=; Path=/; SameSite=Strict; Expires=${formatISO(
+        new Date(0)
+      )}`;
   }
 
   // Gets the session data
