@@ -1,10 +1,12 @@
+import type { Duration } from "date-fns";
 import { BaseStore, type SessionOptions } from "./base";
+import { durationToSeconds } from "@/helpers/durationToSeconds";
 
 export interface BunRedisStoreOptions extends SessionOptions {
   redisClient?: Bun.RedisClient;
   redisOptions?: Bun.RedisOptions;
   redisUrl?: string;
-  redisExpireAfter?: number;
+  redisExpireAfter?: Duration;
 }
 
 /**
@@ -12,7 +14,7 @@ export interface BunRedisStoreOptions extends SessionOptions {
  */
 export class BunRedisStore<T> extends BaseStore<T> {
   private redis: Bun.RedisClient;
-  private redisExpireAfter: number;
+  private redisExpireAfterSeconds: number;
 
   constructor(options: BunRedisStoreOptions) {
     super(options);
@@ -26,25 +28,29 @@ export class BunRedisStore<T> extends BaseStore<T> {
         "RedisStore options with (redisClient) or (redisUrl) is required to create a RedisStore"
       );
     }
+    this.redisExpireAfterSeconds = durationToSeconds({
+      duration: redisExpireAfter,
+      useMinMaxSeconds: true,
+      minSeconds: 60,
+      maxSeconds: 2147483647,
+    });
 
-    this.redisExpireAfter =
-      typeof redisExpireAfter === "number" &&
-      redisExpireAfter >= 0 &&
-      redisExpireAfter <= 2147483647
-        ? redisExpireAfter
-        : 60 * 60 * 6; // redis expiration time in seconds - 6 hours
     if (!this.redis) {
       throw new Error("Failed to create a RedisStore");
     }
   }
 
   async get<T>({ sessionId }: { sessionId: string }) {
+    //  Bun.RedisClient says it has getex but it doesn't seem correct
     const sessionString: string | null = await this.redis.get(
       `session:${sessionId}`
     );
     // extend the session expiration time and return the session object T
     if (sessionString) {
-      await this.redis.expire(`session:${sessionId}`, this.redisExpireAfter);
+      await this.redis.expire(
+        `session:${sessionId}`,
+        this.redisExpireAfterSeconds
+      );
       return JSON.parse(sessionString) as unknown as T;
     }
     return null;
@@ -53,8 +59,12 @@ export class BunRedisStore<T> extends BaseStore<T> {
   async set<T>({ sessionId, session }: { sessionId?: string; session: T }) {
     // unencrypted sessionId passed in
     const sessionString = JSON.stringify(session);
-    await this.redis.set(`session:${sessionId}`, sessionString);
-    await this.redis.expire(`session:${sessionId}`, this.redisExpireAfter);
+    await this.redis.set(
+      `session:${sessionId}`,
+      sessionString,
+      "EX",
+      this.redisExpireAfterSeconds
+    );
   }
 
   async delete({ sessionId }: { sessionId: string }) {

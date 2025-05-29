@@ -42,7 +42,8 @@ const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
   name: "sessionexamplev1",
   store: new RedisStore<SimpleSession>({
     cookieName: "sessionexamplev1",
-    expireAfter: 60 * 60 * 24 * 30,
+    expireAfter: { minutes: 30 },
+    redisExpireAfter: { minutes: 30 },
     // Can be a cluster - but here it is not and can use the same URL
     redisUrl: "redis://redis:6379",
   }),
@@ -55,7 +56,8 @@ const configBun: SessionHandlerConfig<
   name: "sessionexamplev1",
   store: new BunRedisStore<SimpleSession>({
     cookieName: "sessionexamplev1",
-    expireAfter: 60 * 60 * 24 * 30,
+    expireAfter: { minutes: 30 },
+    redisExpireAfter: { minutes: 30 },
     // Not a cluster
     redisUrl: "redis://redis:6379",
   }),

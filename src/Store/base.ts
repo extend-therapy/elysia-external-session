@@ -1,24 +1,28 @@
-import { addHours, formatISO } from "date-fns";
+import { durationToSeconds } from "@/helpers/durationToSeconds";
+import { addSeconds, formatISO, type Duration } from "date-fns";
 export interface SessionOptions {
   cookieName?: string;
-  expireAfter?: number;
+  expireAfter?: Duration;
 }
 
 export abstract class BaseStore<T> {
   protected cookieName: string;
-  protected expireAfter: number;
+  protected expireAfterSeconds: number;
   public createCookieString: (encryptedSessionId: string) => string;
   public resetCookie: () => string;
 
-  constructor({ cookieName = "session", expireAfter = 5 }: SessionOptions) {
+  constructor({
+    cookieName = "session",
+    expireAfter = { hours: 5 },
+  }: SessionOptions) {
     this.cookieName = cookieName ?? "session";
-    this.expireAfter = expireAfter ?? 5; // cookie expiration time - 30 hours
+    this.expireAfterSeconds = durationToSeconds({ duration: expireAfter });
     this.createCookieString = (encryptedSessionId: string) =>
       `${
         this.cookieName
-      }=${encryptedSessionId}; Path=/; SameSite=Strict; Expires=${addHours(
+      }=${encryptedSessionId}; Path=/; SameSite=Strict; Expires=${addSeconds(
         new Date(),
-        this.expireAfter
+        this.expireAfterSeconds
       ).toUTCString()}`;
     this.resetCookie = () =>
       `${this.cookieName}=; Path=/; SameSite=Strict; Expires=${formatISO(

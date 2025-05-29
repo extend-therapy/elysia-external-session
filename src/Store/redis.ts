@@ -1,17 +1,19 @@
 import Redis from "ioredis";
 import type { RedisOptions } from "ioredis";
 import { BaseStore, type SessionOptions } from "./base";
+import { durationToSeconds } from "@/helpers/durationToSeconds";
+import type { Duration } from "date-fns";
 
 export interface RedisStoreOptions extends SessionOptions {
   redisClient?: Redis;
   redisOptions?: RedisOptions;
   redisUrl?: string;
-  redisExpireAfter?: number;
+  redisExpireAfter?: Duration;
 }
 
 export class RedisStore<T> extends BaseStore<T> {
   private redis: Redis;
-  private redisExpireAfter: number;
+  private redisExpireAfterSeconds: number;
 
   constructor(options: RedisStoreOptions) {
     super(options);
@@ -26,25 +28,27 @@ export class RedisStore<T> extends BaseStore<T> {
       );
     }
 
-    this.redisExpireAfter =
-      typeof redisExpireAfter === "number" &&
-      redisExpireAfter >= 0 &&
-      redisExpireAfter <= 2147483647
-        ? redisExpireAfter
-        : 60 * 60 * 6; // redis expiration time in seconds - 6 hours
+    this.redisExpireAfterSeconds = durationToSeconds({
+      duration: redisExpireAfter,
+      useMinMaxSeconds: true,
+      minSeconds: 60,
+      maxSeconds: 2147483647,
+    });
     if (!this.redis) {
       throw new Error("Failed to create a RedisStore");
     }
   }
 
   async get<T>({ sessionId }: { sessionId: string }) {
-    const sessionString: string | null = await this.redis.get(
-      `session:${sessionId}`
+    // get the session and extend the expiration time if it exists
+    const sessionString: string | null = await this.redis.getex(
+      `session:${sessionId}`,
+      "EX",
+      this.redisExpireAfterSeconds
     );
-    // extend the session expiration time and return the session object T
+    // return the session object T
     if (sessionString) {
-      await this.redis.expire(`session:${sessionId}`, this.redisExpireAfter);
-      return JSON.parse(sessionString) as unknown as T;
+      return JSON.parse(sessionString) as T;
     }
     return null;
   }
@@ -52,8 +56,11 @@ export class RedisStore<T> extends BaseStore<T> {
   async set<T>({ sessionId, session }: { sessionId?: string; session: T }) {
     // unencrypted sessionId passed in
     const sessionString = JSON.stringify(session);
-    await this.redis.set(`session:${sessionId}`, sessionString);
-    await this.redis.expire(`session:${sessionId}`, this.redisExpireAfter);
+    await this.redis.setex(
+      `session:${sessionId}`,
+      this.redisExpireAfterSeconds,
+      sessionString
+    );
   }
 
   async delete({ sessionId }: { sessionId: string }) {
