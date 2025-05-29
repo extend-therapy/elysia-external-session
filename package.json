@@ -1,6 +1,6 @@
 {
   "name": "elysia-redis-session",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Elysia Redis Session",
   "author": "Eli Selkin",
   "license": "MIT",

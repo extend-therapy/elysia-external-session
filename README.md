@@ -1,6 +1,6 @@
 # elysia-redis-session
 
-**version: 0.0.6**
+**version: 0.0.7**
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
@@ -16,7 +16,7 @@ or
 
 You can pin a specific released version or commit with something like:
 
-`bun add github:extend-therapy/elysia-redis-session#v0.0.5`
+`bun add github:extend-therapy/elysia-redis-session#v0.0.7`
 
 ## Examples
 Check out the [example](/example) directory to see how to use the store (or extend one yourself).
