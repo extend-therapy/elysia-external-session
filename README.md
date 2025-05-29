@@ -1,6 +1,6 @@
 # elysia-redis-session
 
-**version: 0.0.5**
+**version: 0.0.6**
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
