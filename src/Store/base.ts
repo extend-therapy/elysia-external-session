@@ -38,7 +38,7 @@ export abstract class BaseStore<T> {
     sessionId,
     session,
   }: {
-    sessionId?: string;
+    sessionId: string;
     session: T;
   }): Promise<void>;
 

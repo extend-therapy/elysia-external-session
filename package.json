@@ -1,12 +1,12 @@
 {
-  "name": "elysia-redis-session",
-  "version": "0.0.7",
-  "description": "Elysia Redis Session",
+  "name": "elysia-external-session",
+  "version": "0.0.8",
+  "description": "Elysia External Session",
   "author": "Eli Selkin",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/extend-therapy/elysia-redis-session.git"
+    "url": "https://github.com/extend-therapy/elysia-external-session.git"
   },
   "main": "src/index.ts",
   "files": [

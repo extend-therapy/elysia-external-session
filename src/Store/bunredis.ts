@@ -56,7 +56,7 @@ export class BunRedisStore<T> extends BaseStore<T> {
     return null;
   }
 
-  async set<T>({ sessionId, session }: { sessionId?: string; session: T }) {
+  async set<T>({ sessionId, session }: { sessionId: string; session: T }) {
     // unencrypted sessionId passed in
     const sessionString = JSON.stringify(session);
     await this.redis.set(

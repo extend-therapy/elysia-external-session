@@ -7,6 +7,7 @@ import {
 } from "../src";
 import Elysia, { type Context } from "elysia";
 import { moduleRouter } from "./moduleRouter";
+import { SqliteStore } from "@/Store/sqlite";
 
 // This doesn't have to extend anything anymore - it just has to be JSON serializable
 // What does that mean?
@@ -38,6 +39,18 @@ const requiresSessionWithUser = (ctx: any) => {
 
 const app = new Elysia();
 
+const configSqlite: SessionHandlerConfig<
+  SimpleSession,
+  SqliteStore<SimpleSession>
+> = {
+  name: "sessionexamplev1",
+  store: new SqliteStore<SimpleSession>({
+    cookieName: "sessionexamplev1",
+    dbPath: ":memory:",
+    expireAfter: { minutes: 30 },
+  }),
+};
+
 const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
   name: "sessionexamplev1",
   store: new RedisStore<SimpleSession>({
@@ -67,7 +80,8 @@ app
   // Use RedisStore
   // .use(SessionPlugin(config))
   // Or Use BunRedisStore
-  .use(SessionPlugin(configBun))
+  // .use(SessionPlugin(configBun))
+  .use(SessionPlugin(configSqlite))
   .get("/", (ctx) => {
     return `Hello World no session ${ctx.sessionId}`;
   })
