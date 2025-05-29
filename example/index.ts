@@ -1,5 +1,6 @@
 import {
   default as SessionPlugin,
+  BunRedisStore,
   RedisStore,
   SessionHandler,
   type SessionHandlerConfig,
@@ -21,6 +22,11 @@ export type MySessionHandler = SessionHandler<
   RedisStore<SimpleSession>
 >;
 
+export type MyBunSessionHandler = SessionHandler<
+  SimpleSession,
+  BunRedisStore<SimpleSession>
+>;
+
 const requiresSessionWithUser = (ctx: any) => {
   console.log("requiresSessionWithUser");
   if (!ctx.session?.user) {
@@ -37,13 +43,29 @@ const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
   store: new RedisStore<SimpleSession>({
     cookieName: "sessionexamplev1",
     expireAfter: 60 * 60 * 24 * 30,
-    redisUrl: Bun.env.REDIS_URL ?? "redis://redis:6379",
-    redisOptions: {},
+    // Can be a cluster - but here it is not and can use the same URL
+    redisUrl: "redis://redis:6379",
+  }),
+};
+
+const configBun: SessionHandlerConfig<
+  SimpleSession,
+  BunRedisStore<SimpleSession>
+> = {
+  name: "sessionexamplev1",
+  store: new BunRedisStore<SimpleSession>({
+    cookieName: "sessionexamplev1",
+    expireAfter: 60 * 60 * 24 * 30,
+    // Not a cluster
+    redisUrl: "redis://redis:6379",
   }),
 };
 
 app
-  .use(SessionPlugin(config))
+  // Use RedisStore
+  // .use(SessionPlugin(config))
+  // Or Use BunRedisStore
+  .use(SessionPlugin(configBun))
   .get("/", (ctx) => {
     return `Hello World no session ${ctx.sessionId}`;
   })
@@ -51,6 +73,7 @@ app
     "/auth",
     (ctx: Context & { session: SimpleSession; sessionId: string }) => {
       // Should not get here if called before login
+      console.log("auth", ctx.sessionId);
       return { success: true, message: "You may access this page" };
     },
     {
@@ -84,6 +107,7 @@ app
         sessionHandler: MySessionHandler;
       }
     ) => {
+      console.log("logout", ctx.sessionId);
       ctx.set.status = 200;
       ctx.set.headers["Set-Cookie"] =
         await ctx.sessionHandler.deleteSessionAndClearCookie(ctx.sessionId);

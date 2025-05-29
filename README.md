@@ -69,3 +69,8 @@ Instead of using the aes-256-CGM, you can supply in your config an encrypt and d
 ## The methods may throw (and are not caught)
 
 Because how you choose to handle errors varies and how you choose to handle logging. Errors are thrown from the Encryption class with the `EncryptionError` class type (exported) and `SessionPluginError` from most everywhere else.
+
+
+## Using the session handler
+
+Depending on how the package is imported (whether you're using NodeNext or ESNext) you may not see code completion on the SessionHandler. This might be a good first issue if someone wants to figure out how to get a non-compiled TS library to export the types, it would be fantastic.

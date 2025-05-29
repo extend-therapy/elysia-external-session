@@ -1,25 +1,26 @@
-import Redis from "ioredis";
-import type { RedisOptions } from "ioredis";
 import { BaseStore, type SessionOptions } from "./base";
 
-export interface RedisStoreOptions extends SessionOptions {
-  redisClient?: Redis;
-  redisOptions?: RedisOptions;
+export interface BunRedisStoreOptions extends SessionOptions {
+  redisClient?: Bun.RedisClient;
+  redisOptions?: Bun.RedisOptions;
   redisUrl?: string;
   redisExpireAfter?: number;
 }
 
-export class RedisStore<T> extends BaseStore<T> {
-  private redis: Redis;
+/**
+ * WARNING: Does not work for Redis Clusters. Use RedisStore instead until Bun supports Redis Clusters.
+ */
+export class BunRedisStore<T> extends BaseStore<T> {
+  private redis: Bun.RedisClient;
   private redisExpireAfter: number;
 
-  constructor(options: RedisStoreOptions) {
+  constructor(options: BunRedisStoreOptions) {
     super(options);
     const { redisClient, redisOptions, redisUrl, redisExpireAfter } = options;
     if (redisClient) {
       this.redis = redisClient;
     } else if (redisUrl) {
-      this.redis = new Redis(redisUrl);
+      this.redis = new Bun.RedisClient(redisUrl, redisOptions || {});
     } else {
       throw new Error(
         "RedisStore options with (redisClient) or (redisUrl) is required to create a RedisStore"
