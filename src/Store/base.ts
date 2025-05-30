@@ -1,33 +1,45 @@
 import { durationToSeconds } from "@/helpers/durationToSeconds";
 import { addSeconds, formatISO, type Duration } from "date-fns";
+
+type SimpleCookieOptions = {
+  path?: string;
+  sameSite?: "strict" | "lax" | "none";
+  expires?: Duration;
+};
+
 export interface SessionOptions {
   cookieName?: string;
-  expireAfter?: Duration;
+  cookieOptions?: SimpleCookieOptions;
 }
 
 export abstract class BaseStore<T> {
   protected cookieName: string;
-  protected expireAfterSeconds: number;
+  protected cookieOptions: SimpleCookieOptions;
   public createCookieString: (encryptedSessionId: string) => string;
   public resetCookie: () => string;
+  public getCookieName: () => string;
+  public getCookieOptions: () => SimpleCookieOptions;
 
-  constructor({
-    cookieName = "session",
-    expireAfter = { hours: 5 },
-  }: SessionOptions) {
-    this.cookieName = cookieName ?? "session";
-    this.expireAfterSeconds = durationToSeconds({ duration: expireAfter });
+  constructor(options: SessionOptions) {
+    this.cookieName = options.cookieName ?? "session";
+    this.getCookieName = () => this.cookieName;
+    this.cookieOptions = {
+      path: options.cookieOptions?.path,
+      sameSite: options.cookieOptions?.sameSite,
+      expires: options.cookieOptions?.expires,
+    };
+    this.getCookieOptions = () => this.cookieOptions;
     this.createCookieString = (encryptedSessionId: string) =>
-      `${
-        this.cookieName
-      }=${encryptedSessionId}; Path=/; SameSite=Strict; Expires=${addSeconds(
+      `${this.cookieName}=${encryptedSessionId}; Path=${
+        this.cookieOptions.path
+      }; SameSite=${this.cookieOptions.sameSite}; Expires=${addSeconds(
         new Date(),
-        this.expireAfterSeconds
+        durationToSeconds({ duration: this.cookieOptions.expires })
       ).toUTCString()}`;
     this.resetCookie = () =>
-      `${this.cookieName}=; Path=/; SameSite=Strict; Expires=${formatISO(
-        new Date(0)
-      )}`;
+      `${this.cookieName}=; Path=${this.cookieOptions.path}; SameSite=${
+        this.cookieOptions.sameSite
+      }; Expires=${new Date(0).toUTCString()}`;
   }
 
   // Gets the session data

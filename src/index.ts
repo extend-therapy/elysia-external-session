@@ -27,7 +27,7 @@ export class SessionPluginError extends Error {
 function SessionPlugin<T, U extends BaseStore<T>>(
   config: SessionHandlerConfig<T, U>
 ) {
-  return new Elysia({ name: config.name ?? "session" })
+  return new Elysia({ name: config.name ?? "plugin-session" })
     .decorate("sessionHandler", new SessionHandler<T, U>(config))
     .derive({ as: "global" }, async ({ sessionHandler, cookie, request }) => {
       const sessionReturn: {
@@ -38,8 +38,7 @@ function SessionPlugin<T, U extends BaseStore<T>>(
         session: null,
       };
       const { sessionId, session } = await sessionHandler.sessionFromCookie(
-        cookie,
-        config.name
+        cookie
       );
       if (!sessionId || !session) {
         return sessionReturn;
@@ -52,7 +51,6 @@ function SessionPlugin<T, U extends BaseStore<T>>(
     .onAfterHandle(
       { as: "global" },
       async ({ request, session, sessionId, set, sessionHandler }) => {
-        // if (request.headers.get("cookie")) {
         if (session && sessionId) {
           const cookieString = sessionHandler.createCookieString(
             await sessionHandler.encrypt(sessionId)

@@ -1,11 +1,12 @@
 import type { Duration } from "date-fns";
 import { BaseStore, type SessionOptions } from "./base";
 import { durationToSeconds } from "@/helpers/durationToSeconds";
-
 export interface BunRedisStoreOptions extends SessionOptions {
   redisClient?: Bun.RedisClient;
   redisOptions?: Bun.RedisOptions;
   redisUrl?: string;
+  // Made this separate because you may want to set the expiration time for the session
+  // differently from the cookie expiration time
   redisExpireAfter?: Duration;
 }
 

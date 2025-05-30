@@ -20,6 +20,7 @@ class SessionResponse {
 
 export class SqliteStore<T> extends BaseStore<T> {
   private db: Database;
+  private expireAfterSeconds: number;
 
   constructor(options: SqliteStoreOptions) {
     super(options);

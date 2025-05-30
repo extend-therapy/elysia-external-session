@@ -44,7 +44,8 @@ export declare class SessionHandler<T, U extends BaseStore<T>> {
     deleteSession: ({ sessionId, }: {
         sessionId: string;
     }) => Promise<boolean>;
-    sessionFromCookie: (cookie?: Record<string, Cookie<string | undefined>>, name?: string) => Promise<{
+    getCookieName: () => string;
+    sessionFromCookie: (cookie?: Record<string, Cookie<string | undefined>>) => Promise<{
         sessionId?: string;
         session?: T;
     }>;

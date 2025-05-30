@@ -63,9 +63,10 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     sessionId: string;
   }) => Promise<boolean>; // returns true if session was deleted, false if not found
 
+  public getCookieName: () => string;
+
   public sessionFromCookie: (
-    cookie?: Record<string, Cookie<string | undefined>>,
-    name?: string
+    cookie?: Record<string, Cookie<string | undefined>>
   ) => Promise<{
     sessionId?: string;
     session?: T;
@@ -93,6 +94,9 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     }
     this.encrypt = this.encryptionHandler.encrypt.bind(this.encryptionHandler);
     this.sessionStore = config.store;
+    this.getCookieName = this.sessionStore.getCookieName.bind(
+      this.sessionStore
+    );
     this.getSession = this.sessionStore.get.bind(this.sessionStore);
     this.setSession = this.sessionStore.set.bind(this.sessionStore);
     this.deleteSession = this.sessionStore.delete.bind(this.sessionStore);
@@ -115,8 +119,7 @@ export class SessionHandler<T, U extends BaseStore<T>> {
       this.sessionStore
     );
     this.sessionFromCookie = async (
-      cookie?: Record<string, Cookie<string | undefined>>,
-      name: string = "session"
+      cookie?: Record<string, Cookie<string | undefined>>
     ): Promise<{
       sessionId?: string;
       session?: T;
@@ -124,6 +127,8 @@ export class SessionHandler<T, U extends BaseStore<T>> {
       if (!cookie) {
         return {};
       }
+
+      const name = this.getCookieName();
 
       const sessionCookie = cookie[name]?.value;
       if (!sessionCookie) {

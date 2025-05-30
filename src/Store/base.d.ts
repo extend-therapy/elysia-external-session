@@ -1,14 +1,21 @@
 import { type Duration } from "date-fns";
+type SimpleCookieOptions = {
+    path?: string;
+    sameSite?: "strict" | "lax" | "none";
+    expires?: Duration;
+};
 export interface SessionOptions {
     cookieName?: string;
-    expireAfter?: Duration;
+    cookieOptions?: SimpleCookieOptions;
 }
 export declare abstract class BaseStore<T> {
     protected cookieName: string;
-    protected expireAfterSeconds: number;
+    protected cookieOptions: SimpleCookieOptions;
     createCookieString: (encryptedSessionId: string) => string;
     resetCookie: () => string;
-    constructor({ cookieName, expireAfter, }: SessionOptions);
+    getCookieName: () => string;
+    getCookieOptions: () => SimpleCookieOptions;
+    constructor(options: SessionOptions);
     abstract get<T>({ sessionId }: {
         sessionId: string;
     }): Promise<T | null>;
@@ -20,3 +27,4 @@ export declare abstract class BaseStore<T> {
         sessionId: string;
     }): Promise<boolean>;
 }
+export {};
