@@ -9,9 +9,6 @@
     "url": "https://github.com/extend-therapy/elysia-external-session.git"
   },
   "main": "src/index.ts",
-  "files": [
-    "src"
-  ],
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
