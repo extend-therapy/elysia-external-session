@@ -18,15 +18,15 @@ interface SimpleSession {
   user: any | undefined;
 }
 
-export type MySessionHandler = SessionHandler<
+type MySessionHandler = SessionHandler<
   SimpleSession,
   RedisStore<SimpleSession>
 >;
 
-export type MyBunSessionHandler = SessionHandler<
-  SimpleSession,
-  BunRedisStore<SimpleSession>
->;
+// type MyBunSessionHandler = SessionHandler<
+//   SimpleSession,
+//   BunRedisStore<SimpleSession>
+// >;
 
 const requiresSessionWithUser = (ctx: any) => {
   console.log("requiresSessionWithUser");
@@ -62,19 +62,19 @@ const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
   }),
 };
 
-const configBun: SessionHandlerConfig<
-  SimpleSession,
-  BunRedisStore<SimpleSession>
-> = {
-  name: "sessionexamplev1",
-  store: new BunRedisStore<SimpleSession>({
-    cookieName: "sessionexamplev1",
-    expireAfter: { minutes: 30 },
-    redisExpireAfter: { minutes: 30 },
-    // Not a cluster
-    redisUrl: "redis://redis:6379",
-  }),
-};
+// const configBun: SessionHandlerConfig<
+//   SimpleSession,
+//   BunRedisStore<SimpleSession>
+// > = {
+//   name: "sessionexamplev1",
+//   store: new BunRedisStore<SimpleSession>({
+//     cookieName: "sessionexamplev1",
+//     expireAfter: { minutes: 30 },
+//     redisExpireAfter: { minutes: 30 },
+//     // Not a cluster
+//     redisUrl: "redis://redis:6379",
+//   }),
+// };
 
 app
   // Use RedisStore

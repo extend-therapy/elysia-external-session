@@ -2,15 +2,19 @@ import { Elysia } from "elysia";
 import type { BaseStore } from "./Store/base";
 import { SessionHandler, type SessionHandlerConfig } from "./SessionHandler";
 
-export { BaseStore, type SessionOptions } from "./Store/base";
 export { type SessionHandlerConfig } from "./SessionHandler";
 export { SessionHandler } from "./SessionHandler";
 
+// Stores
+export { BaseStore, type SessionOptions } from "./Store/base";
 // Redis Store - Supports Redis Clusters.
 export { RedisStore, type RedisStoreOptions } from "./Store/redis";
 
 // Bun Redis Store - Not supported for Redis Clusters. Use RedisStore instead until Bun supports Redis Clusters.
 export { BunRedisStore, type BunRedisStoreOptions } from "./Store/bunredis";
+
+// Sqlite Store
+export { SqliteStore, type SqliteStoreOptions } from "./Store/sqlite";
 
 export class SessionPluginError extends Error {
   public readonly name = "SessionPluginError";
@@ -20,10 +24,10 @@ export class SessionPluginError extends Error {
   }
 }
 
-const SessionPlugin = <T, U extends BaseStore<T>>(
+function SessionPlugin<T, U extends BaseStore<T>>(
   config: SessionHandlerConfig<T, U>
-) =>
-  new Elysia({ name: config.name ?? "session" })
+) {
+  return new Elysia({ name: config.name ?? "session" })
     .decorate("sessionHandler", new SessionHandler<T, U>(config))
     .derive({ as: "global" }, async ({ sessionHandler, cookie, request }) => {
       const sessionReturn: {
@@ -58,4 +62,5 @@ const SessionPlugin = <T, U extends BaseStore<T>>(
         }
       }
     );
+}
 export default SessionPlugin;
