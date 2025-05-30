@@ -8,6 +8,7 @@ export interface SqliteStoreOptions extends SessionOptions {
 }
 export declare class SqliteStore<T> extends BaseStore<T> {
     private db;
+    private expireAfterSeconds;
     constructor(options: SqliteStoreOptions);
     get<T>({ sessionId }: {
         sessionId: string;
