@@ -2,7 +2,7 @@
 
 Now called Elysia External Session plugin
 
-**version: 0.0.8**
+**version: 0.0.9**
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
@@ -18,7 +18,7 @@ or
 
 You can pin a specific released version or commit with something like:
 
-`bun add github:extend-therapy/elysia-external-session#v0.0.8`
+`bun add github:extend-therapy/elysia-external-session#v0.0.9`
 
 ## Examples
 Check out the [example](/example) directory to see how to use the store (or extend one yourself).
