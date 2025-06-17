@@ -6,7 +6,7 @@ Now called Elysia External Session plugin
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
-A Typescript (Bun-specific!!!) plugin for Elysia.js that makes using sessions on external services easier. Initially it was just for Redis, but now works for SQLite as well. While I wanted to use the Bun-native RedisClient for the Redis part, it does not support clusters yet, so for production use-cases it may be less functional at the moment (i.e. cannot connect to Upstash or various resources that now by default use clusters). Therefore, a dependency of this package currently is `ioredis`.
+A Typescript **_ONLY_**  and **_Bun-specific_** plugin for Elysia.js that makes using sessions on external services easier. Initially it was just for Redis, but now works for SQLite as well. While I wanted to use the Bun-native RedisClient for the Redis part, it does not support clusters yet, so for production use-cases it may be less functional at the moment (i.e. cannot connect to Upstash or various resources that now by default use clusters). Therefore, a dependency of this package currently is `ioredis`.
 
 This is only a typescript package and can be installed by using:
 
