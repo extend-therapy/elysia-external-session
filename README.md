@@ -12,7 +12,7 @@ This is only a typescript package and can be installed by using:
 
 `bun add github:extend-therapy/elysia-external-session`
 
-or 
+or
 
 `bun add git+ssh://github.com/extend-therapy/elysia-external-session.git`
 

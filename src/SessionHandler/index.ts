@@ -50,6 +50,7 @@ export class SessionHandler<T, U extends BaseStore<T>> {
   }: {
     sessionId: string;
   }) => Promise<T | null>; // returns session or null
+
   public setSession: ({
     sessionId,
     session,
@@ -57,6 +58,23 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     sessionId: string;
     session: T;
   }) => Promise<void>; // returns void
+
+  // generally flash is a string message that is deleted after being read once
+  public getFlash?: ({
+    sessionId,
+  }: {
+    sessionId: string;
+  }) => Promise<string | null>; // returns flash or null
+
+  // generally flash is a string message that is deleted after being read once
+  public setFlash?: ({
+    sessionId,
+    flash,
+  }: {
+    sessionId: string;
+    flash: string;
+  }) => Promise<void>; // returns void
+
   public deleteSession: ({
     sessionId,
   }: {
@@ -66,7 +84,7 @@ export class SessionHandler<T, U extends BaseStore<T>> {
   public getCookieName: () => string;
 
   public sessionFromCookie: (
-    cookie?: Record<string, Cookie<string | undefined>>
+    cookie?: Record<string, Cookie<unknown>>
   ) => Promise<{
     sessionId?: string;
     session?: T;
@@ -99,6 +117,8 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     );
     this.getSession = this.sessionStore.get.bind(this.sessionStore);
     this.setSession = this.sessionStore.set.bind(this.sessionStore);
+    this.getFlash = this.sessionStore.getFlash?.bind(this.sessionStore);
+    this.setFlash = this.sessionStore.setFlash?.bind(this.sessionStore);
     this.deleteSession = this.sessionStore.delete.bind(this.sessionStore);
     this.createSession = async ({ session }: { session: T }) => {
       const sessionId = Bun.randomUUIDv7();
@@ -115,11 +135,13 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     this.getSessionId = async (sessionId: string) => {
       return this.encryptionHandler.decrypt(sessionId);
     };
+
     this.createCookieString = this.sessionStore.createCookieString.bind(
       this.sessionStore
     );
+
     this.sessionFromCookie = async (
-      cookie?: Record<string, Cookie<string | undefined>>
+      cookie?: Record<string, Cookie<unknown>>
     ): Promise<{
       sessionId?: string;
       session?: T;
@@ -130,7 +152,7 @@ export class SessionHandler<T, U extends BaseStore<T>> {
 
       const name = this.getCookieName();
 
-      const sessionCookie = cookie[name]?.value;
+      const sessionCookie = cookie[name]?.value as string;
       if (!sessionCookie) {
         return {};
       }

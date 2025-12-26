@@ -22,4 +22,11 @@ export declare class RedisStore<T> extends BaseStore<T> {
     delete({ sessionId }: {
         sessionId: string;
     }): Promise<boolean>;
+    getFlash({ sessionId }: {
+        sessionId: string;
+    }): Promise<string | null>;
+    setFlash({ sessionId, flash }: {
+        sessionId: string;
+        flash: string;
+    }): Promise<void>;
 }

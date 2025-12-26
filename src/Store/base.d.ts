@@ -3,6 +3,8 @@ type SimpleCookieOptions = {
     path?: string;
     sameSite?: "strict" | "lax" | "none";
     expires?: Duration;
+    secure?: boolean;
+    httpOnly?: boolean;
 };
 export interface SessionOptions {
     cookieName?: string;
@@ -26,5 +28,16 @@ export declare abstract class BaseStore<T> {
     abstract delete({ sessionId }: {
         sessionId: string;
     }): Promise<boolean>;
+    /**
+     * Flash is a special message that is stored in the session and is deleted after it is read once.
+     * Flash is optional to introduce, so these methods have default no-op implementations.
+     */
+    getFlash({ sessionId }: {
+        sessionId: string;
+    }): Promise<string | null>;
+    setFlash({ sessionId, flash, }: {
+        sessionId: string;
+        flash: string;
+    }): Promise<void>;
 }
 export {};

@@ -5,6 +5,8 @@ type SimpleCookieOptions = {
   path?: string;
   sameSite?: "strict" | "lax" | "none";
   expires?: Duration;
+  secure?: boolean;
+  httpOnly?: boolean;
 };
 
 export interface SessionOptions {
@@ -32,7 +34,9 @@ export abstract class BaseStore<T> {
     this.createCookieString = (encryptedSessionId: string) =>
       `${this.cookieName}=${encryptedSessionId}; Path=${
         this.cookieOptions.path
-      }; SameSite=${this.cookieOptions.sameSite}; Expires=${addSeconds(
+      }; SameSite=${this.cookieOptions.sameSite}; Secure=${!!this.cookieOptions
+        .secure}; HttpOnly=${!!this.cookieOptions
+        .httpOnly}; Expires=${addSeconds(
         new Date(),
         durationToSeconds({ duration: this.cookieOptions.expires })
       ).toUTCString()}`;
@@ -56,4 +60,22 @@ export abstract class BaseStore<T> {
 
   // Deletes the session data returns true if session was deleted, false if not found
   abstract delete({ sessionId }: { sessionId: string }): Promise<boolean>;
+
+  /**
+   * Flash is a special message that is stored in the session and is deleted after it is read once.
+   * Flash is optional to introduce, so these methods have default no-op implementations.
+   */
+  // Checks if session has flash
+  async getFlash({ sessionId }: { sessionId: string }): Promise<string | null> {
+    return null;
+  }
+
+  // Sets flash for the session
+  async setFlash({
+    sessionId,
+    flash,
+  }: {
+    sessionId: string;
+    flash: string;
+  }): Promise<void> {}
 }

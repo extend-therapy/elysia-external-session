@@ -1,13 +1,13 @@
 import {
   default as SessionPlugin,
-  BunRedisStore,
+  // BunRedisStore,
   RedisStore,
   SessionHandler,
   type SessionHandlerConfig,
 } from "../src";
 import Elysia, { type Context } from "elysia";
 import { moduleRouter } from "./moduleRouter";
-import { SqliteStore } from "@/Store/sqlite";
+import { SqliteStore } from "../src/Store/sqlite";
 
 // This doesn't have to extend anything anymore - it just has to be JSON serializable
 // What does that mean?

@@ -19,10 +19,18 @@ export class Encryption {
     key = Bun.env.ENCRYPTION_KEY,
     algorithm: crypto.CipherGCMTypes = "aes-256-gcm"
   ) {
-    this.key = Buffer.from(key ?? "", "hex");
-    this.algorithm = algorithm ?? ("aes-256-gcm" as crypto.CipherGCMTypes);
-    if (!this.key.length || !this.algorithm) {
-      throw new Error("ENCRYPTION_KEY is not set");
+    if (!key) {
+      throw new Error("Could not find key");
+    }
+    this.key = Buffer.from(key, "hex");
+    if (algorithm.includes("256") && this.key.length !== 32) {
+      throw new Error(
+        "AES 256 of all types requires 32 bytes of data in hex encoding for the key"
+      );
+    }
+    this.algorithm = algorithm;
+    if (!this.algorithm) {
+      throw new Error("Error creating algorithm -- e.g. key or algo");
     }
   }
 

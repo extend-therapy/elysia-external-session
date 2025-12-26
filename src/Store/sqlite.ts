@@ -2,6 +2,7 @@ import type { Duration } from "date-fns";
 import { BaseStore, type SessionOptions } from "./base";
 import { Database } from "bun:sqlite";
 import { durationToSeconds } from "@/helpers/durationToSeconds";
+import { mkdir } from "node:fs/promises";
 
 export interface SqliteStoreOptions extends SessionOptions {
   dbPath?: string; // ":memory:" or a file
@@ -24,14 +25,18 @@ export class SqliteStore<T> extends BaseStore<T> {
 
   constructor(options: SqliteStoreOptions) {
     super(options);
-    this.db = options.db ?? new Database(options.dbPath ?? ":memory:");
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS sessions (
-        session_id TEXT PRIMARY KEY,
-        session TEXT,
-        expires_at INTEGER
-      )
-    `);
+    if (options.dbPath && !options.db) {
+      console.log("Using SQLite database at:", options.dbPath);
+      this.db = new Database(options.dbPath);
+    } else if (options.db) {
+      this.db = options.db;
+    } else {
+      this.db = new Database(":memory:");
+    }
+
+    if (!this.db) {
+      throw new Error("Database not initialized");
+    }
 
     this.expireAfterSeconds = durationToSeconds({
       duration: options.expireAfter,

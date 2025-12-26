@@ -41,11 +41,18 @@ export declare class SessionHandler<T, U extends BaseStore<T>> {
         sessionId: string;
         session: T;
     }) => Promise<void>;
+    getFlash?: ({ sessionId, }: {
+        sessionId: string;
+    }) => Promise<string | null>;
+    setFlash?: ({ sessionId, flash, }: {
+        sessionId: string;
+        flash: string;
+    }) => Promise<void>;
     deleteSession: ({ sessionId, }: {
         sessionId: string;
     }) => Promise<boolean>;
     getCookieName: () => string;
-    sessionFromCookie: (cookie?: Record<string, Cookie<string | undefined>>) => Promise<{
+    sessionFromCookie: (cookie?: Record<string, Cookie<unknown>>) => Promise<{
         sessionId?: string;
         session?: T;
     }>;

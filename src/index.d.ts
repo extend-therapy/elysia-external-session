@@ -33,15 +33,18 @@ declare function SessionPlugin<T, U extends BaseStore<T>>(config: SessionHandler
     macro: {};
     macroFn: {};
     parser: {};
+    response: {};
 }, {}, {
     derive: {};
     resolve: {};
     schema: {};
     standaloneSchema: {};
+    response: {};
 }, {
     derive: {};
     resolve: {};
     schema: {};
     standaloneSchema: {};
+    response: {};
 }>;
 export default SessionPlugin;

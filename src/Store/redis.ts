@@ -67,4 +67,24 @@ export class RedisStore<T> extends BaseStore<T> {
     await this.redis.del(`session:${sessionId}`);
     return true;
   }
+
+  // get and delete flash message
+  async getFlash({ sessionId }: { sessionId: string }) {
+    const flashString: string | null = await this.redis.get(
+      `flash:${sessionId}`
+    );
+    if (flashString) {
+      await this.redis.del(`flash:${sessionId}`);
+      return flashString;
+    }
+    return null;
+  }
+  // set flash message
+  async setFlash({ sessionId, flash }: { sessionId: string; flash: string }) {
+    await this.redis.setex(
+      `flash:${sessionId}`,
+      this.redisExpireAfterSeconds,
+      flash
+    );
+  }
 }
