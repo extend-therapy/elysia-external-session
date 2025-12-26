@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "date-fns": "4.1.0",
-    "elysia": "1.4.18",
+    "elysia": "1.4.19",
     "typescript": "5.9.3",
     "ioredis": "5.8.2"
   },
