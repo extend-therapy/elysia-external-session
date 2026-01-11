@@ -7,7 +7,7 @@ export interface BunRedisStoreOptions extends SessionOptions {
   redisUrl?: string;
   // Made this separate because you may want to set the expiration time for the session
   // differently from the cookie expiration time
-  redisExpireAfter?: Duration;
+  expiresAfter?: Duration;
 }
 
 /**
@@ -19,7 +19,7 @@ export class BunRedisStore<T> extends BaseStore<T> {
 
   constructor(options: BunRedisStoreOptions) {
     super(options);
-    const { redisClient, redisOptions, redisUrl, redisExpireAfter } = options;
+    const { redisClient, redisOptions, redisUrl, expiresAfter } = options;
     if (redisClient) {
       this.redis = redisClient;
     } else if (redisUrl) {
@@ -30,7 +30,7 @@ export class BunRedisStore<T> extends BaseStore<T> {
       );
     }
     this.redisExpireAfterSeconds = durationToSeconds({
-      duration: redisExpireAfter,
+      duration: expiresAfter,
       useMinMaxSeconds: true,
       minSeconds: 60,
       maxSeconds: 2147483647,

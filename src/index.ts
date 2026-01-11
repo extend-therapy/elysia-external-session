@@ -29,7 +29,7 @@ function SessionPlugin<T, U extends BaseStore<T>>(
 ) {
   return new Elysia({ name: config.name ?? "plugin-session" })
     .decorate("sessionHandler", new SessionHandler<T, U>(config))
-    .derive({ as: "global" }, async ({ sessionHandler, cookie, request }) => {
+    .resolve({ as: "global" }, async ({ sessionHandler, cookie }) => {
       const sessionReturn: {
         sessionId: string | null | undefined;
         session: T | null;
@@ -50,12 +50,14 @@ function SessionPlugin<T, U extends BaseStore<T>>(
     })
     .onAfterHandle(
       { as: "global" },
-      async ({ request, session, sessionId, set, sessionHandler }) => {
+      async ({ session, sessionId, set, sessionHandler }) => {
         if (session && sessionId) {
           const cookieString = sessionHandler.createCookieString(
             await sessionHandler.encrypt(sessionId)
           );
-          const currentCookie = request.headers.get("cookie");
+          if (cookieString) {
+            return
+          }
           set.headers["Set-Cookie"] = cookieString;
         }
       }

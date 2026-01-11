@@ -1,18 +1,17 @@
-import Redis from "ioredis";
-import type { RedisOptions } from "ioredis";
+import { RedisClient, type RedisOptions } from "bun";
 import { BaseStore, type SessionOptions } from "./base";
 import { durationToSeconds } from "@/helpers/durationToSeconds";
 import type { Duration } from "date-fns";
 
 export interface RedisStoreOptions extends SessionOptions {
-  redisClient?: Redis;
+  redisClient?: RedisClient;
   redisOptions?: RedisOptions;
   redisUrl?: string;
   redisExpireAfter?: Duration;
 }
 
 export class RedisStore<T> extends BaseStore<T> {
-  private redis: Redis;
+  private redis: RedisClient;
   private redisExpireAfterSeconds: number;
 
   constructor(options: RedisStoreOptions) {
@@ -21,7 +20,7 @@ export class RedisStore<T> extends BaseStore<T> {
     if (redisClient) {
       this.redis = redisClient;
     } else if (redisUrl) {
-      this.redis = new Redis(redisUrl);
+      this.redis = new RedisClient(redisUrl, redisOptions);
     } else {
       throw new Error(
         "RedisStore options with (redisClient) or (redisUrl) is required to create a RedisStore"

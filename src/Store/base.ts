@@ -32,17 +32,15 @@ export abstract class BaseStore<T> {
     };
     this.getCookieOptions = () => this.cookieOptions;
     this.createCookieString = (encryptedSessionId: string) =>
-      `${this.cookieName}=${encryptedSessionId}; Path=${
-        this.cookieOptions.path
+      `${this.cookieName}=${encryptedSessionId}; Path=${this.cookieOptions.path
       }; SameSite=${this.cookieOptions.sameSite}; Secure=${!!this.cookieOptions
         .secure}; HttpOnly=${!!this.cookieOptions
-        .httpOnly}; Expires=${addSeconds(
-        new Date(),
-        durationToSeconds({ duration: this.cookieOptions.expires })
-      ).toUTCString()}`;
+          .httpOnly}; Expires=${addSeconds(
+            new Date(),
+            durationToSeconds({ duration: this.cookieOptions.expires })
+          ).toUTCString()}`;
     this.resetCookie = () =>
-      `${this.cookieName}=; Path=${this.cookieOptions.path}; SameSite=${
-        this.cookieOptions.sameSite
+      `${this.cookieName}=; Path=${this.cookieOptions.path}; SameSite=${this.cookieOptions.sameSite
       }; Expires=${new Date(0).toUTCString()}`;
   }
 
@@ -65,8 +63,14 @@ export abstract class BaseStore<T> {
    * Flash is a special message that is stored in the session and is deleted after it is read once.
    * Flash is optional to introduce, so these methods have default no-op implementations.
    */
-  // Checks if session has flash
+  // Gets Flash from the session (and deletes it)
   async getFlash({ sessionId }: { sessionId: string }): Promise<string | null> {
+    const gSession = await this.get<{ flash?: string }>({ sessionId });
+    if (gSession && gSession.flash) {
+      const { flash, ...sessionWithoutFlash } = gSession;
+      await this.set({ sessionId, session: sessionWithoutFlash });
+      return flash;
+    }
     return null;
   }
 
@@ -77,5 +81,9 @@ export abstract class BaseStore<T> {
   }: {
     sessionId: string;
     flash: string;
-  }): Promise<void> {}
+  }): Promise<void> {
+    const gSession = (await this.get<{ flash?: string }>({ sessionId })) || {};
+    gSession.flash = flash;
+    await this.set({ sessionId, session: gSession });
+  }
 }

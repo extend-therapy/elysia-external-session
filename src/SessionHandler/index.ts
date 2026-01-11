@@ -1,5 +1,5 @@
 import type { Cookie } from "elysia";
-import SessionPlugin, { SessionPluginError } from "..";
+import { SessionPluginError } from "..";
 import { Encryption } from "../Encryption";
 import type { BaseStore } from "../Store/base";
 
@@ -22,9 +22,9 @@ export class SessionHandler<T, U extends BaseStore<T>> {
   protected encryptionHandler:
     | Encryption
     | {
-        encrypt: (value: string) => Promise<string>;
-        decrypt: (value: string) => Promise<string | null>;
-      };
+      encrypt: (value: string) => Promise<string>;
+      decrypt: (value: string) => Promise<string | null>;
+    };
   protected sessionStore: U;
 
   /**

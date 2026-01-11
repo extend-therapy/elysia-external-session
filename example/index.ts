@@ -1,11 +1,11 @@
 import {
   default as SessionPlugin,
   // BunRedisStore,
-  RedisStore,
-  SessionHandler,
+  // RedisStore,
+  // SessionHandler,
   type SessionHandlerConfig,
 } from "../src";
-import Elysia, { type Context } from "elysia";
+import Elysia from "elysia";
 import { moduleRouter } from "./moduleRouter";
 import { SqliteStore } from "../src/Store/sqlite";
 
@@ -15,18 +15,8 @@ import { SqliteStore } from "../src/Store/sqlite";
 // Instead use timestamps or other simple data types (Objects as values are generally ok as long as they do not contain functions or dates)
 // This is generally the case for redis - but if you create your own store that can store these things, then it's up to you
 interface SimpleSession {
-  user: any | undefined;
+  user: unknown;
 }
-
-type MySessionHandler = SessionHandler<
-  SimpleSession,
-  RedisStore<SimpleSession>
->;
-
-// type MyBunSessionHandler = SessionHandler<
-//   SimpleSession,
-//   BunRedisStore<SimpleSession>
-// >;
 
 const requiresSessionWithUser = (ctx: any) => {
   console.log("requiresSessionWithUser");
@@ -51,17 +41,6 @@ const configSqlite: SessionHandlerConfig<
   }),
 };
 
-const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
-  name: "sessionexamplev1",
-  store: new RedisStore<SimpleSession>({
-    cookieName: "sessionexamplev1",
-    expireAfter: { minutes: 30 },
-    redisExpireAfter: { minutes: 30 },
-    // Can be a cluster - but here it is not and can use the same URL
-    redisUrl: "redis://redis:6379",
-  }),
-};
-
 // const configBun: SessionHandlerConfig<
 //   SimpleSession,
 //   BunRedisStore<SimpleSession>
@@ -69,8 +48,7 @@ const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
 //   name: "sessionexamplev1",
 //   store: new BunRedisStore<SimpleSession>({
 //     cookieName: "sessionexamplev1",
-//     expireAfter: { minutes: 30 },
-//     redisExpireAfter: { minutes: 30 },
+//     expiresAfter: { minutes: 30 },
 //     // Not a cluster
 //     redisUrl: "redis://redis:6379",
 //   }),
@@ -87,7 +65,7 @@ app
   })
   .post(
     "/auth",
-    (ctx: Context & { session: SimpleSession; sessionId: string }) => {
+    (ctx) => {
       // Should not get here if called before login
       console.log("auth", ctx.sessionId);
       return { success: true, message: "You may access this page" };
@@ -98,15 +76,11 @@ app
   )
   .post(
     "/login",
-    async (
-      ctx: Context & {
-        session: SimpleSession;
-        sessionHandler: MySessionHandler;
-      }
-    ) => {
-      ctx.session = { user: { name: "John Doe" } } as SimpleSession;
+    async (ctx) => {
+      const existings = ctx.session;
+      const session = Object.assign({}, existings, { user: { name: "John Doe" } } as SimpleSession);
       const encryptedSessionId = await ctx.sessionHandler.createSession({
-        session: ctx.session,
+        session,
       });
       console.log({ encryptedSessionId });
       ctx.set.headers["Set-Cookie"] =
@@ -116,13 +90,11 @@ app
   )
   .post(
     "/logout",
-    async (
-      ctx: Context & {
-        session: SimpleSession;
-        sessionId: string;
-        sessionHandler: MySessionHandler;
+    async (ctx) => {
+      if (!ctx.sessionId) {
+        ctx.set.status = 400;
+        return { success: false, message: "No session to logout from" };
       }
-    ) => {
       console.log("logout", ctx.sessionId);
       ctx.set.status = 200;
       ctx.set.headers["Set-Cookie"] =
