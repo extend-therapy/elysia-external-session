@@ -18,7 +18,7 @@ or
 
 You can pin a specific released version or commit with something like:
 
-`bun add github:extend-therapy/elysia-external-session#v0.0.11`
+`bun add github:extend-therapy/elysia-external-session.git#v0.0.11`
 
 ## Examples
 
