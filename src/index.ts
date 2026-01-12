@@ -25,7 +25,8 @@ export class SessionPluginError extends Error {
 }
 
 function SessionPlugin<T, U extends BaseStore<T>>(
-  config: SessionHandlerConfig<T, U>
+  config: SessionHandlerConfig<T, U>,
+  user?: T
 ) {
   return new Elysia({ name: config.name ?? "plugin-session" })
     .decorate("sessionHandler", new SessionHandler<T, U>(config))
@@ -40,9 +41,13 @@ function SessionPlugin<T, U extends BaseStore<T>>(
       const { sessionId, session } = await sessionHandler.sessionFromCookie(
         cookie
       );
+      if (user) {
+        return { sessionId: "testid", session: { user } };
+      }
       if (!sessionId || !session) {
         return sessionReturn;
       }
+
 
       // This does not catch invalid session ids
 
