@@ -48,7 +48,6 @@ function SessionPlugin<T, U extends BaseStore<T>>(
         return sessionReturn;
       }
 
-
       // This does not catch invalid session ids
 
       return { sessionId, session };
