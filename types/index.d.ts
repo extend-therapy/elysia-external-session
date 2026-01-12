@@ -22,9 +22,7 @@ declare function SessionPlugin<T, U extends BaseStore<T>>(config: SessionHandler
         session: T | null;
     } | {
         readonly sessionId: "testid";
-        readonly session: {
-            readonly user: NonNullable<T>;
-        };
+        readonly session: T;
     } | {
         readonly sessionId: string;
         readonly session: NonNullable<T>;

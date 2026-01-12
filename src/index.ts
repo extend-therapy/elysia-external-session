@@ -26,7 +26,7 @@ export class SessionPluginError extends Error {
 
 function SessionPlugin<T, U extends BaseStore<T>>(
   config: SessionHandlerConfig<T, U>,
-  user?: T
+  mockSession?: T
 ) {
   return new Elysia({ name: config.name ?? "plugin-session" })
     .decorate("sessionHandler", new SessionHandler<T, U>(config))
@@ -41,9 +41,8 @@ function SessionPlugin<T, U extends BaseStore<T>>(
       const { sessionId, session } = await sessionHandler.sessionFromCookie(
         cookie
       );
-      if (user) {
-        const t: T = user;
-        return { sessionId: "testid", session: t };
+      if (mockSession) {
+        return { sessionId: "testid", session: mockSession };
       }
       if (!sessionId || !session) {
         return sessionReturn;
