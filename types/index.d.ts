@@ -11,7 +11,7 @@ export declare class SessionPluginError extends Error {
     readonly name = "SessionPluginError";
     constructor(message: string, cause?: Error);
 }
-declare function SessionPlugin<T, U extends BaseStore<T>>(config: SessionHandlerConfig<T, U>): Elysia<"", {
+declare function SessionPlugin<T, U extends BaseStore<T>>(config: SessionHandlerConfig<T, U>, user?: T): Elysia<"", {
     decorator: {
         sessionHandler: SessionHandler<T, U>;
     };
@@ -20,6 +20,11 @@ declare function SessionPlugin<T, U extends BaseStore<T>>(config: SessionHandler
     resolve: {
         sessionId: string | null | undefined;
         session: T | null;
+    } | {
+        readonly sessionId: "testid";
+        readonly session: {
+            readonly user: NonNullable<T>;
+        };
     } | {
         readonly sessionId: string;
         readonly session: NonNullable<T>;
