@@ -42,7 +42,8 @@ function SessionPlugin<T, U extends BaseStore<T>>(
         cookie
       );
       if (user) {
-        return { sessionId: "testid", session: { user } };
+        const t: T = user;
+        return { sessionId: "testid", session: t };
       }
       if (!sessionId || !session) {
         return sessionReturn;
