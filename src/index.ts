@@ -21,7 +21,7 @@ export class SessionPluginError extends Error {
 
 function SessionPlugin<T, U extends BaseStore<T>>(
   config: SessionHandlerConfig<T, U>,
-  mockSession?: T
+  mockSession?: T,
 ) {
   return new Elysia({ name: config.name ?? "plugin-session" })
     .decorate("sessionHandler", new SessionHandler<T, U>(config))
@@ -33,9 +33,7 @@ function SessionPlugin<T, U extends BaseStore<T>>(
         sessionId: undefined,
         session: null,
       };
-      const { sessionId, session } = await sessionHandler.sessionFromCookie(
-        cookie
-      );
+      const { sessionId, session } = await sessionHandler.sessionFromCookie(cookie);
       if (mockSession) {
         return { sessionId: "testid", session: mockSession };
       }
@@ -47,19 +45,16 @@ function SessionPlugin<T, U extends BaseStore<T>>(
 
       return { sessionId, session };
     })
-    .onAfterHandle(
-      { as: "global" },
-      async ({ session, sessionId, set, sessionHandler }) => {
-        if (session && sessionId) {
-          const cookieString = sessionHandler.createCookieString(
-            await sessionHandler.encrypt(sessionId)
-          );
-          if (cookieString) {
-            return
-          }
-          set.headers["Set-Cookie"] = cookieString;
+    .onAfterHandle({ as: "global" }, async ({ session, sessionId, set, sessionHandler }) => {
+      if (session && sessionId) {
+        const cookieString = sessionHandler.createCookieString(
+          await sessionHandler.encrypt(sessionId),
+        );
+        if (cookieString) {
+          return;
         }
+        set.headers["Set-Cookie"] = cookieString;
       }
-    );
+    });
 }
 export default SessionPlugin;
