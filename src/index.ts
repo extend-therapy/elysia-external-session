@@ -1,20 +1,15 @@
 import { Elysia } from "elysia";
-import type { BaseStore } from "./Store/base";
-import { SessionHandler, type SessionHandlerConfig } from "./SessionHandler";
 
-export { type SessionHandlerConfig } from "./SessionHandler";
-export { SessionHandler } from "./SessionHandler";
+// Session Handler
+import type { SessionHandlerConfig } from "./SessionHandler";
+import { SessionHandler } from "./SessionHandler";
+// Export SessionHandler
+export * from "./SessionHandler";
 
 // Stores
-export { BaseStore, type SessionOptions } from "./Store/base";
-// Redis Store - Supports Redis Clusters.
-export { RedisStore, type RedisStoreOptions } from "./Store/redis";
-
-// Bun Redis Store - Not supported for Redis Clusters. Use RedisStore instead until Bun supports Redis Clusters.
-export { BunRedisStore, type BunRedisStoreOptions } from "./Store/bunredis";
-
-// Sqlite Store
-export { SqliteStore, type SqliteStoreOptions } from "./Store/sqlite";
+import type { BaseStore } from "./Store";
+// Export all stores
+export * from "./Store";
 
 export class SessionPluginError extends Error {
   public readonly name = "SessionPluginError";

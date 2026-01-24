@@ -1,6 +1,5 @@
 import crypto from "crypto";
 
-const SALT_LENGTH = 16;
 const IV_LENGTH = 12;
 
 export class EncryptionError extends Error {

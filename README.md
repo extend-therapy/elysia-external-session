@@ -2,11 +2,17 @@
 
 Now called Elysia External Session plugin
 
-## version: 0.0.11
+## version: 0.0.12
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
-A Typescript **_ONLY_**  and **_Bun-specific_** plugin for Elysia.js that makes using sessions on external services easier. Initially it was just for Redis, but now works for SQLite as well. While I wanted to use the Bun-native RedisClient for the Redis part, it does not support clusters yet, so for production use-cases it may be less functional at the moment (i.e. cannot connect to Upstash or various resources that now by default use clusters). Therefore, a dependency of this package currently is `ioredis`.
+A plugin for Elysia.js that makes using sessions on external services easier. Initially it was just for Redis, but now works for SQLite with included stores. It does heavily rely on the Bun runtime.
+
+## Compatibility
+
+- v0.0.12 is compatible with Elysia v1.4.15 and above.
+
+## Package Type
 
 This is only a typescript package and can be installed by using:
 
@@ -18,7 +24,7 @@ or
 
 You can pin a specific released version or commit with something like:
 
-`bun add github:extend-therapy/elysia-external-session.git#v0.0.11`
+`bun add github:extend-therapy/elysia-external-session.git#v0.0.12`
 
 ## Examples
 
@@ -28,7 +34,7 @@ If you want to just run the example, use the [docker compose yaml](/docker-compo
 
 ## Simple Usage
 
-Make sure the types passed to your  below matches the name of your interface above. You don't have to use `RedisStore`. You can make your own or use SqliteStore or BunRedisStore. [See below](#extending-the-store-and-session).
+Make sure the types passed to your  below matches the name of your interface above. You don't have to use `RedisStore`. You can make your own or use SqliteStore or RedisStore. [See below](#extending-the-store).
 
 ```ts
 const interface SimpleSession {
@@ -45,7 +51,7 @@ const config: SessionHandlerConfig<SimpleSession, RedisStore<SimpleSession>> = {
   name: "session_whatnot",
   store: new RedisStore<SimpleSession>({
     cookieName: "sessionexamplev1",
-    expireAfter: 60 * 60 * 24 * 30,
+    expiresAfter: { days: 30 },
     redisClient: redisClient,
   })
 }

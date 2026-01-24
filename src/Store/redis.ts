@@ -1,89 +1,73 @@
-import { RedisClient, type RedisOptions } from "bun";
-import { BaseStore, type SessionOptions } from "./base";
 import { durationToSeconds } from "@/helpers/durationToSeconds";
 import type { Duration } from "date-fns";
-
+import { BaseStore, type SessionOptions } from "./base";
 export interface RedisStoreOptions extends SessionOptions {
-  redisClient?: RedisClient;
-  redisOptions?: RedisOptions;
+  redisClient?: Bun.RedisClient;
+  redisOptions?: Bun.RedisOptions;
   redisUrl?: string;
-  redisExpireAfter?: Duration;
+  expiresAfter?: Duration;
 }
 
-export class RedisStore<T> extends BaseStore<T> {
-  private redis: RedisClient;
-  private redisExpireAfterSeconds: number;
+/**
+ * WARNING: Does not work for Redis Clusters. Use RedisStore instead until Bun supports Redis Clusters.
+ */
+export class BunRedisStore<T> extends BaseStore<T> {
+  private redis: Bun.RedisClient;
+  private redisExpiresAfterSeconds: number;
 
   constructor(options: RedisStoreOptions) {
     super(options);
-    const { redisClient, redisOptions, redisUrl, redisExpireAfter } = options;
+    const { redisClient, redisOptions, redisUrl, expiresAfter } = options;
     if (redisClient) {
       this.redis = redisClient;
     } else if (redisUrl) {
-      this.redis = new RedisClient(redisUrl, redisOptions);
+      this.redis = new Bun.RedisClient(redisUrl, redisOptions || {});
     } else {
       throw new Error(
         "RedisStore options with (redisClient) or (redisUrl) is required to create a RedisStore"
       );
     }
-
-    this.redisExpireAfterSeconds = durationToSeconds({
-      duration: redisExpireAfter,
+    this.redisExpiresAfterSeconds = durationToSeconds({
+      duration: expiresAfter,
       useMinMaxSeconds: true,
       minSeconds: 60,
       maxSeconds: 2147483647,
     });
+
     if (!this.redis) {
       throw new Error("Failed to create a RedisStore");
     }
   }
 
-  async get<T>({ sessionId }: { sessionId: string }) {
-    // get the session and extend the expiration time if it exists
-    const sessionString: string | null = await this.redis.getex(
-      `session:${sessionId}`,
-      "EX",
-      this.redisExpireAfterSeconds
+  async get({ sessionId }: { sessionId: string }) {
+    //  Bun.RedisClient says it has getex but it doesn't seem correct
+    const sessionString: string | null = await this.redis.get(
+      `session:${sessionId}`
     );
-    // return the session object T
+    // extend the session expiration time and return the session object T
     if (sessionString) {
-      return JSON.parse(sessionString) as T;
+      await this.redis.expire(
+        `session:${sessionId}`,
+        this.redisExpiresAfterSeconds
+      );
+      return JSON.parse(sessionString) as unknown as T;
     }
     return null;
   }
 
-  async set<T>({ sessionId, session }: { sessionId: string; session: T }) {
+  async set({ sessionId, session }: { sessionId: string; session: T }) {
     // unencrypted sessionId passed in
     const sessionString = JSON.stringify(session);
-    await this.redis.setex(
+    await this.redis.set(
       `session:${sessionId}`,
-      this.redisExpireAfterSeconds,
-      sessionString
+      sessionString,
+      "EX",
+      this.redisExpiresAfterSeconds
     );
   }
 
   async delete({ sessionId }: { sessionId: string }) {
     await this.redis.del(`session:${sessionId}`);
     return true;
-  }
-
-  // get and delete flash message
-  async getFlash({ sessionId }: { sessionId: string }) {
-    const flashString: string | null = await this.redis.get(
-      `flash:${sessionId}`
-    );
-    if (flashString) {
-      await this.redis.del(`flash:${sessionId}`);
-      return flashString;
-    }
-    return null;
-  }
-  // set flash message
-  async setFlash({ sessionId, flash }: { sessionId: string; flash: string }) {
-    await this.redis.setex(
-      `flash:${sessionId}`,
-      this.redisExpireAfterSeconds,
-      flash
-    );
   }
 }

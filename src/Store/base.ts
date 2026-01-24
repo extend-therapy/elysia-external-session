@@ -1,5 +1,5 @@
 import { durationToSeconds } from "@/helpers/durationToSeconds";
-import { addSeconds, formatISO, type Duration } from "date-fns";
+import { addSeconds, type Duration } from "date-fns";
 
 type SimpleCookieOptions = {
   path?: string;
@@ -45,10 +45,10 @@ export abstract class BaseStore<T> {
   }
 
   // Gets the session data
-  abstract get<T>({ sessionId }: { sessionId: string }): Promise<T | null>;
+  abstract get({ sessionId }: { sessionId: string }): Promise<T | null>;
 
   // Sets or creates the session data. SessionHandler has a wrapper for this for createSession that also creates a sessionId
-  abstract set<T>({
+  abstract set({
     sessionId,
     session,
   }: {
@@ -65,10 +65,12 @@ export abstract class BaseStore<T> {
    */
   // Gets Flash from the session (and deletes it)
   async getFlash({ sessionId }: { sessionId: string }): Promise<string | null> {
-    const gSession = await this.get<{ flash?: string }>({ sessionId });
+    const gSession = (await this.get({ sessionId })) as (T & {
+      flash?: string;
+    }) | null;
     if (gSession && gSession.flash) {
       const { flash, ...sessionWithoutFlash } = gSession;
-      await this.set({ sessionId, session: sessionWithoutFlash });
+      await this.set({ sessionId, session: sessionWithoutFlash as T });
       return flash;
     }
     return null;
@@ -82,8 +84,10 @@ export abstract class BaseStore<T> {
     sessionId: string;
     flash: string;
   }): Promise<void> {
-    const gSession = (await this.get<{ flash?: string }>({ sessionId })) || {};
+    const gSession =
+      ((await this.get({ sessionId })) as (T & { flash?: string })) ||
+      ({} as T & { flash?: string });
     gSession.flash = flash;
-    await this.set({ sessionId, session: gSession });
+    await this.set({ sessionId, session: gSession as T });
   }
 }
