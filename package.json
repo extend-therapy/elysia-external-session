@@ -10,7 +10,6 @@
   },
   "scripts": {
     "build": "rm -rf dist || true && tsc",
-    "precommit": "bun lint && bun test && bun run build",
     "prepublishOnly": "bun lint && bun test && bun run build",
     "test": "bun test",
     "dev": "tsc --watch",
