@@ -24,12 +24,13 @@ export class BunRedisStore<T> extends BaseStore<T> {
       this.redis = new Bun.RedisClient(redisUrl, redisOptions || {});
     } else {
       throw new Error(
-        "RedisStore options with (redisClient) or (redisUrl) is required to create a RedisStore"
+        "RedisStore options with (redisClient) or (redisUrl) is required to create a RedisStore",
       );
     }
     this.redisExpiresAfterSeconds = durationToSeconds({
       duration: expiresAfter,
-      useMinMaxSeconds: true,
+      useMin: true,
+      useMax: true,
       minSeconds: 60,
       maxSeconds: 2147483647,
     });
@@ -41,15 +42,10 @@ export class BunRedisStore<T> extends BaseStore<T> {
 
   async get({ sessionId }: { sessionId: string }) {
     //  Bun.RedisClient says it has getex but it doesn't seem correct
-    const sessionString: string | null = await this.redis.get(
-      `session:${sessionId}`
-    );
+    const sessionString: string | null = await this.redis.get(`session:${sessionId}`);
     // extend the session expiration time and return the session object T
     if (sessionString) {
-      await this.redis.expire(
-        `session:${sessionId}`,
-        this.redisExpiresAfterSeconds
-      );
+      await this.redis.expire(`session:${sessionId}`, this.redisExpiresAfterSeconds);
       return JSON.parse(sessionString) as unknown as T;
     }
     return null;
@@ -62,7 +58,7 @@ export class BunRedisStore<T> extends BaseStore<T> {
       `session:${sessionId}`,
       sessionString,
       "EX",
-      this.redisExpiresAfterSeconds
+      this.redisExpiresAfterSeconds,
     );
   }
 

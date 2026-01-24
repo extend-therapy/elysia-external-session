@@ -22,31 +22,51 @@ describe("durationToSeconds", () => {
     expect(durationToSeconds({ defaultDuration: { minutes: 10 } })).toBe(600);
   });
 
-  test("should respect useMinMaxSeconds - under min", () => {
-    // If undermin, returns defaultDuration (24 hours = 86400)
+  test("should respect useMin - under min", () => {
+    // If under min, returns minSeconds
     expect(
       durationToSeconds({
         duration: { seconds: 10 },
-        useMinMaxSeconds: true,
+        useMin: true,
         minSeconds: 60,
-      })
-    ).toBe(86400);
+        maxSeconds: 60000, // doesn't use maxSeconds
+      }),
+    ).toBe(60);
   });
 
-  test("should respect useMinMaxSeconds - over max", () => {
-    // If overmax, returns defaultDuration (24 hours = 86400)
+  test("should respect useMax - over max", () => {
+    // If overmax, returns maxSeconds
     expect(
       durationToSeconds({
         duration: { days: 100 },
-        useMinMaxSeconds: true,
+        useMax: true,
         maxSeconds: 3600,
-      })
-    ).toBe(86400);
+        minSeconds: 60000, // doesn't use minSeconds
+      }),
+    ).toBe(3600);
+  });
+
+  test("should respect useMin - under min (default)", () => {
+    // If under min, returns default minSeconds = 0
+    expect(
+      durationToSeconds({
+        duration: { seconds: -10 },
+        useMin: true,
+      }),
+    ).toBe(0);
+  });
+
+  test("should respect useMax - over max (default)", () => {
+    // If overmax, returns default maxSeconds = 2147483647 (2147483647 seconds = 68 years)
+    expect(
+      durationToSeconds({
+        duration: { years: 100 },
+        useMax: true,
+      }),
+    ).toBe(2147483647);
   });
 
   test("should handle complex durations", () => {
-    expect(
-      durationToSeconds({ duration: { hours: 1, minutes: 30, seconds: 15 } })
-    ).toBe(5415);
+    expect(durationToSeconds({ duration: { hours: 1, minutes: 30, seconds: 15 } })).toBe(5415);
   });
 });
