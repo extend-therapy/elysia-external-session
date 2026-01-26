@@ -61,9 +61,7 @@ function SessionPlugin<T, U extends BaseStore<T>>(config: SessionHandlerConfig<T
         await sessionHandler.deleteSessionAndClearCookie(sessionId, cookie);
       },
     ) // delete session helper
-    .derive({ as: "global" }, (ctx) =>
-      cookieResolver({ cookie: ctx.cookie, sessionHandler, mergedConfig }),
-    ); // cookie resolver
+    .derive({ as: "global" }, (ctx) => cookieResolver({ cookie: ctx.cookie, sessionHandler })); // cookie resolver
 
   return plugin;
 }

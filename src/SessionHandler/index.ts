@@ -111,7 +111,10 @@ export class SessionHandler<T, U extends BaseStore<T>> {
     this.deleteSessionAndClearCookie = async (sessionId: string, cookie: Context["cookie"]) => {
       await this.deleteSession({ sessionId });
       const resetCookie = this.sessionStore.resetCookie();
-      cookie[this.getCookieName()]!.remove();
+      const cookieName = this.getCookieName();
+      if (cookie && cookie[cookieName]) {
+        cookie[cookieName]!.remove();
+      }
       return resetCookie;
     };
     this.getSessionId = async (sessionId: string) => {
