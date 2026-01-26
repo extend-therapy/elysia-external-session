@@ -2,7 +2,7 @@
 
 Now called Elysia External Session plugin
 
-## version: 0.0.15
+## version: 0.0.16
 
 Distributed under MIT license, understand what that means and read the [LICENSE](/LICENSE) file.
 
@@ -10,7 +10,7 @@ A plugin for Elysia.js that makes using sessions on external services easier. In
 
 ## Compatibility
 
-- v0.0.12-v0.0.15 is compatible with Elysia v1.4.15 and above.
+- v0.0.12-v0.0.16 is compatible with Elysia v1.4.15 and above.
 
 ## Package Type
 
@@ -24,7 +24,7 @@ or
 
 You can pin a specific released version or commit with something like:
 
-`bun add github:extend-therapy/elysia-external-session.git#v0.0.15`
+`bun add github:extend-therapy/elysia-external-session.git#v0.0.16`
 
 ## Examples
 
