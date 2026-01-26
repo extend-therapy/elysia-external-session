@@ -1,6 +1,6 @@
-import { durationToSeconds } from "@/helpers/durationToSeconds";
 import { Database } from "bun:sqlite";
 import type { Duration } from "date-fns";
+import { durationToSeconds } from "../helpers/durationToSeconds";
 import { BaseStore, type SessionOptions } from "./base";
 
 export interface SqliteStoreOptions extends SessionOptions {
@@ -25,7 +25,6 @@ export class SqliteStore<T> extends BaseStore<T> {
   constructor(options: SqliteStoreOptions) {
     super(options);
     if (options.dbPath && !options.db) {
-      console.log("Using SQLite database at:", options.dbPath);
       this.db = new Database(options.dbPath);
     } else if (options.db) {
       this.db = options.db;
@@ -62,9 +61,7 @@ export class SqliteStore<T> extends BaseStore<T> {
     if (sessionResponse) {
       const now = new Date().getTime();
       if (sessionResponse.expires_at < now) {
-        this.db
-          .prepare("DELETE FROM sessions WHERE session_id = ?")
-          .run(sessionId);
+        this.db.prepare("DELETE FROM sessions WHERE session_id = ?").run(sessionId);
         return null;
       }
       const session = JSON.parse(sessionResponse.session) as T;
@@ -83,16 +80,12 @@ export class SqliteStore<T> extends BaseStore<T> {
     }
     const now = new Date().getTime();
     this.db
-      .prepare(
-        "INSERT OR REPLACE INTO sessions (session_id, session, expires_at) VALUES (?, ?, ?)"
-      )
+      .prepare("INSERT OR REPLACE INTO sessions (session_id, session, expires_at) VALUES (?, ?, ?)")
       .run(sessionId, sessionString, now + this.expiresAfterSeconds * 1000);
   }
 
   async delete({ sessionId }: { sessionId: string }) {
-    const result = this.db
-      .prepare("DELETE FROM sessions WHERE session_id = ?")
-      .run(sessionId);
+    const result = this.db.prepare("DELETE FROM sessions WHERE session_id = ?").run(sessionId);
     return result.changes > 0;
   }
 }

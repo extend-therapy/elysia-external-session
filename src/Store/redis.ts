@@ -1,5 +1,5 @@
-import { durationToSeconds } from "@/helpers/durationToSeconds";
 import type { Duration } from "date-fns";
+import { durationToSeconds } from "../helpers/durationToSeconds";
 import { BaseStore, type SessionOptions } from "./base";
 export interface RedisStoreOptions extends SessionOptions {
   redisClient?: Bun.RedisClient;

@@ -1,10 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import Elysia from "elysia";
-import {
-  default as SessionPlugin,
-  SqliteStore,
-  type SessionHandlerConfig
-} from "../src";
+import { default as SessionPlugin, SqliteStore, type SessionHandlerConfig } from "../src";
 import { moduleRouter } from "./moduleRouter";
 
 // This doesn't have to extend anything anymore - it just has to be JSON serializable
@@ -25,10 +21,7 @@ const requiresSessionWithUser = (ctx: any) => {
 
 const app = new Elysia();
 
-const configSqlite: SessionHandlerConfig<
-  SimpleSession,
-  SqliteStore<SimpleSession>
-> = {
+const configSqlite: SessionHandlerConfig<SimpleSession, SqliteStore<SimpleSession>> = {
   name: "sessionexamplev1",
   store: new SqliteStore<SimpleSession>({
     cookieName: "sessionexamplev1",
@@ -36,7 +29,6 @@ const configSqlite: SessionHandlerConfig<
     expiresAfter: { minutes: 30 },
   }),
 };
-
 
 app
   .use(SessionPlugin(configSqlite))
@@ -50,36 +42,30 @@ app
     },
     {
       beforeHandle: requiresSessionWithUser,
-    }
+    },
   )
-  .post(
-    "/login",
-    async (ctx) => {
-      const existings = ctx.session;
-      const session = Object.assign({}, existings, { user: { name: "John Doe" } } as SimpleSession);
-      const encryptedSessionId = await ctx.sessionHandler.createSession({
-        session,
-      });
-      ctx.set.headers["Set-Cookie"] =
-        ctx.sessionHandler.createCookieString(encryptedSessionId);
-      return { success: true, message: "Logged in" };
+  .post("/login", async (ctx) => {
+    const existings = ctx.session;
+    const session = Object.assign({}, existings, { user: { name: "John Doe" } } as SimpleSession);
+    const encryptedSessionId = await ctx.sessionHandler.createSession({
+      session,
+    });
+    ctx.set.headers["Set-Cookie"] = ctx.sessionHandler.createCookieString(encryptedSessionId);
+    return { success: true, message: "Logged in" };
+  })
+  .post("/logout", async (ctx) => {
+    if (!ctx.sessionId) {
+      ctx.set.status = 400;
+      return { success: false, message: "No session to logout from" };
     }
-  )
-  .post(
-    "/logout",
-    async (ctx) => {
-      if (!ctx.sessionId) {
-        ctx.set.status = 400;
-        return { success: false, message: "No session to logout from" };
-      }
-      ctx.set.status = 200;
-      ctx.set.headers["Set-Cookie"] =
-        await ctx.sessionHandler.deleteSessionAndClearCookie(ctx.sessionId);
-      return { success: true, message: "Logged out" };
-    }
-  )
+    ctx.set.status = 200;
+    ctx.set.headers["Set-Cookie"] = await ctx.sessionHandler.deleteSessionAndClearCookie(
+      ctx.sessionId,
+      ctx.cookie,
+    );
+    return { success: true, message: "Logged out" };
+  })
   .use(moduleRouter);
-
 
 describe("Example Server Tests", () => {
   it("should return hello world and a session ID on /", async () => {
@@ -90,9 +76,7 @@ describe("Example Server Tests", () => {
   });
 
   it("should return 401 on /auth when not logged in", async () => {
-    const response = await app.handle(
-      new Request("http://localhost/auth", { method: "POST" })
-    );
+    const response = await app.handle(new Request("http://localhost/auth", { method: "POST" }));
     expect(response.status).toBe(401);
     const json: any = await response.json();
     expect(json.success).toBe(false);
@@ -102,7 +86,7 @@ describe("Example Server Tests", () => {
   it("should login and access /auth with cookie", async () => {
     // 1. Login
     const loginResponse = await app.handle(
-      new Request("http://localhost/login", { method: "POST" })
+      new Request("http://localhost/login", { method: "POST" }),
     );
     expect(loginResponse.status).toBe(200);
     const loginJson: any = await loginResponse.json();
@@ -118,7 +102,7 @@ describe("Example Server Tests", () => {
         headers: {
           Cookie: setCookie!,
         },
-      })
+      }),
     );
     expect(authResponse.status).toBe(200);
     const authJson: any = await authResponse.json();
@@ -129,7 +113,7 @@ describe("Example Server Tests", () => {
   it("should logout successfully", async () => {
     // 1. Login to get a session
     const loginResponse = await app.handle(
-      new Request("http://localhost/login", { method: "POST" })
+      new Request("http://localhost/login", { method: "POST" }),
     );
     const setCookie = loginResponse.headers.get("Set-Cookie");
 
@@ -140,7 +124,7 @@ describe("Example Server Tests", () => {
         headers: {
           Cookie: setCookie!,
         },
-      })
+      }),
     );
     expect(logoutResponse.status).toBe(200);
     const logoutJson: any = await logoutResponse.json();
@@ -157,7 +141,7 @@ describe("Example Server Tests", () => {
         headers: {
           Cookie: setCookie!,
         },
-      })
+      }),
     );
     expect(authResponse.status).toBe(401);
   });
