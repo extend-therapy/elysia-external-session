@@ -50,7 +50,7 @@ export abstract class BaseStore<T> {
       return parts.join("; ");
     };
     this.resetCookie = () =>
-      `${this.cookieName}=; Path=${this.cookieOptions.path}; SameSite=${
+      `${this.cookieName}=; Path=${this.cookieOptions.path ?? "/"}; SameSite=${
         this.cookieOptions.sameSite
       }; Expires=${new Date(0).toUTCString()}`;
   }

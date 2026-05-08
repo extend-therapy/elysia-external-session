@@ -55,7 +55,8 @@ describe("SessionHandler", () => {
 
   test("should generate correct cookie string", () => {
     const cookieString = handler.createCookieString("some-encrypted-id");
+    console.log(cookieString);
     expect(cookieString).toContain("session=some-encrypted-id");
-    expect(cookieString).toContain("Path=undefined");
+    expect(cookieString).toContain("Path=/");
   });
 });
