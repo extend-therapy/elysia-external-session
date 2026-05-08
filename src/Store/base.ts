@@ -26,19 +26,29 @@ export abstract class BaseStore<T> {
     this.cookieName = options.cookieName ?? "session";
     this.getCookieName = () => this.cookieName;
     this.cookieOptions = {
-      path: options.cookieOptions?.path,
+      path: options.cookieOptions?.path ?? "/",
       sameSite: options.cookieOptions?.sameSite,
       expires: options.cookieOptions?.expires,
+      secure: options.cookieOptions?.secure,
+      httpOnly: options.cookieOptions?.httpOnly,
     };
     this.getCookieOptions = () => this.cookieOptions;
-    this.createCookieString = (encryptedSessionId: string) =>
-      `${this.cookieName}=${encryptedSessionId}; Path=${
-        this.cookieOptions.path
-      }; SameSite=${this.cookieOptions.sameSite}; Secure=${!!this.cookieOptions
-        .secure}; HttpOnly=${!!this.cookieOptions.httpOnly}; Expires=${addSeconds(
-        new Date(),
-        durationToSeconds({ duration: this.cookieOptions.expires }),
-      ).toUTCString()}`;
+    // RFC 6265: Secure / HttpOnly are presence-only flags; emitting `Secure=false`
+    // would be parsed as the flag being set on most browsers.
+    this.createCookieString = (encryptedSessionId: string) => {
+      const parts = [
+        `${this.cookieName}=${encryptedSessionId}`,
+        `Path=${this.cookieOptions.path}`,
+        `SameSite=${this.cookieOptions.sameSite}`,
+        `Expires=${addSeconds(
+          new Date(),
+          durationToSeconds({ duration: this.cookieOptions.expires }),
+        ).toUTCString()}`,
+      ];
+      if (this.cookieOptions.secure) parts.push("Secure");
+      if (this.cookieOptions.httpOnly) parts.push("HttpOnly");
+      return parts.join("; ");
+    };
     this.resetCookie = () =>
       `${this.cookieName}=; Path=${this.cookieOptions.path}; SameSite=${
         this.cookieOptions.sameSite
