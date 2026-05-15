@@ -1,5 +1,8 @@
 {
   "name": "@extend-therapy/elysia-external-session",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "version": "0.0.18",
   "description": "Elysia External Session",
   "author": "Eli Selkin",
