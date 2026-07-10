@@ -1,15 +1,12 @@
 {
   "name": "@extend-therapy/elysia-external-session",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  },
   "version": "0.1.0",
   "description": "Elysia External Session",
   "author": "Eli Selkin",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/extend-therapy/elysia-external-session.git"
+    "url": "git+https://github.com/extend-therapy/elysia-external-session.git"
   },
   "scripts": {
     "build": "rm -rf dist || true && tsc",
@@ -18,6 +15,7 @@
     "dev": "tsc --watch",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
+    "up": "bun run scripts/bump.ts",
     "pub": "op run --env-file=.env.op -- bun publish"
   },
   "main": "dist/src/index.js",
@@ -41,6 +39,7 @@
   },
   "files": [
     "dist/**/*",
+    "!dist/tests/**",
     "README.md",
     "package.json",
     "LICENSE"
