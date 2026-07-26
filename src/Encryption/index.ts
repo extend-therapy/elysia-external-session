@@ -68,7 +68,19 @@ export class Encryption {
 
     decipher.setAuthTag(tag);
 
-    const decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+    let decrypted: Buffer;
+    try {
+      decrypted = Buffer.concat([decipher.update(encrypted), decipher.final()]);
+    } catch (cause) {
+      // GCM verifies the auth tag in final(), and node throws a bare
+      // "Unsupported state or unable to authenticate data" when it doesn't
+      // match — i.e. this value was encrypted with a DIFFERENT key (env switch,
+      // key rotation) or was tampered with. The structural checks above can't
+      // catch that, since such a value is perfectly well-formed. Surface it as
+      // our typed error so callers can tell "not valid for this key" apart from
+      // a genuine fault and treat it as unauthenticated rather than a 500.
+      throw new EncryptionError("Could not decrypt value", cause as Error);
+    }
 
     return decrypted.toString("utf-8");
   }
