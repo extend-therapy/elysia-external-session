@@ -25,6 +25,22 @@ describe("SessionHandler", () => {
     });
   });
 
+  test("getSessionId returns null (not a throw) for a cookie encrypted with another key", async () => {
+    const otherKey = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210";
+    process.env.ENCRYPTION_KEY = otherKey;
+    const foreign = await new SessionHandler({
+      store,
+      name: "other-session-plugin",
+      scope: "global",
+    }).createSession({ session: { userId: 1 } });
+    process.env.ENCRYPTION_KEY = testKey;
+
+    // The whole point: an undecryptable cookie is an unauthenticated request,
+    // not a 500 on every single call until the user clears cookies by hand.
+    expect(await handler.getSessionId(foreign)).toBeNull();
+    expect(await handler.sessionFromCookieString(foreign)).toEqual({});
+  });
+
   test("should create a session and return encrypted sessionId", async () => {
     const sessionData = { userId: 123 };
     const encryptedId = await handler.createSession({ session: sessionData });

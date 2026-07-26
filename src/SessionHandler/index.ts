@@ -1,6 +1,6 @@
 import type { Context, Cookie, CookieOptions } from "elysia";
 import { SessionPluginError } from "..";
-import { Encryption } from "../Encryption";
+import { Encryption, EncryptionError } from "../Encryption";
 import type { BaseStore } from "../Store/base";
 
 /**
@@ -118,7 +118,22 @@ export class SessionHandler<T, U extends BaseStore<T>> {
       return resetCookie;
     };
     this.getSessionId = async (sessionId: string) => {
-      return this.encryptionHandler.decrypt(sessionId);
+      try {
+        return await this.encryptionHandler.decrypt(sessionId);
+      } catch (error) {
+        // A cookie we can't decrypt is an invalid session, not a server fault.
+        // It happens routinely: pointing an app at a different ENCRYPTION_KEY
+        // (env switch), rotating the key, or a truncated/tampered cookie. Return
+        // null so the normal "no session" path runs — the caller answers 401 and
+        // the cookie resolver clears the dead cookie — instead of every single
+        // request throwing a 500 until the user manually clears cookies.
+        // Anything that isn't a decryption failure (store faults, bugs in a
+        // caller-supplied decrypt) still propagates.
+        if (error instanceof EncryptionError) {
+          return null;
+        }
+        throw error;
+      }
     };
 
     this.createCookieString = this.sessionStore.createCookieString.bind(this.sessionStore);

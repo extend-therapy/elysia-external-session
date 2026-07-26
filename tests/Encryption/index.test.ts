@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { Encryption } from "../../src/Encryption";
+import { Encryption, EncryptionError } from "../../src/Encryption";
 
 describe("Encryption", () => {
   const testKey = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"; // 64 hex chars = 32 bytes
@@ -14,6 +14,26 @@ describe("Encryption", () => {
 
     const decrypted = await encryption.decrypt(encrypted);
     expect(decrypted).toBe(originalValue);
+  });
+
+  test("should throw EncryptionError when the value was encrypted with a different key", async () => {
+    const otherKey = "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210";
+    const encrypted = await new Encryption(otherKey).encrypt("hello-world-session-id");
+
+    // Structurally valid (right IV/tag lengths) — only the GCM tag check catches
+    // it, and that happens inside final().
+    const attempt = new Encryption(testKey).decrypt(encrypted);
+    await expect(attempt).rejects.toThrow(EncryptionError);
+    await expect(attempt).rejects.toThrow("Could not decrypt value");
+  });
+
+  test("should throw EncryptionError when the ciphertext was tampered with", async () => {
+    const encryption = new Encryption(testKey);
+    const encrypted = await encryption.encrypt("hello-world-session-id");
+    // Flip the last byte of the auth tag.
+    const flipped = encrypted.slice(0, -2) + (encrypted.slice(-2) === "00" ? "01" : "00");
+
+    await expect(encryption.decrypt(flipped)).rejects.toThrow(EncryptionError);
   });
 
   test("should throw error if key is missing", () => {
