@@ -10,8 +10,8 @@
   },
   "scripts": {
     "build": "rm -rf dist || true && tsc",
-    "prepublishOnly": "bun lint:fix && bun test && bun run build",
-    "test": "bun test",
+    "prepublishOnly": "bun lint:fix && bun run test && bun run build",
+    "test": "bun test ./tests ./example",
     "dev": "tsc --watch",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
