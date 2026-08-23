@@ -3,6 +3,19 @@ import Elysia from "elysia";
 import { default as SessionPlugin, SqliteStore, type SessionHandlerConfig } from "../src";
 import { moduleRouter } from "./moduleRouter";
 
+// Set before anything below constructs the plugin. `SessionPlugin(configSqlite)`
+// runs at module scope, and it builds an Encryption that throws
+// "Could not find key" when ENCRYPTION_KEY is unset -- so this cannot wait for a
+// beforeEach.
+//
+// This file previously relied on a `tests/` file having already set the variable
+// as an import side effect, which held only because `bun test ./tests ./example`
+// loads them in that order. A bare `bun test` walks example/ first and the whole
+// file failed to load, taking its four tests with it -- which is exactly what
+// the publish workflow runs, so releases broke while PR CI stayed green.
+process.env.ENCRYPTION_KEY =
+  "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
+
 // This doesn't have to extend anything anymore - it just has to be JSON serializable
 // What does that mean?
 // Example: If you include a Date or function in your session object, then it will not be simply JSON serializable
