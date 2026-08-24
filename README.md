@@ -80,3 +80,21 @@ Because how you choose to handle errors varies and how you choose to handle logg
 ## Using the session handler
 
 Depending on how the package is imported (whether you're using NodeNext or ESNext) you may not see code completion on the SessionHandler. This might be a good first issue if someone wants to figure out how to get a non-compiled TS library to export the types, it would be fantastic.
+
+## Versions
+
+Two supported lines, mirroring how the Elysia ecosystem itself ships. The 2.0 line is
+published as a **prerelease** because the Elysia it targets is itself a beta -- a plain `2.0.1`
+would resolve as stable for `@2` and misrepresent that:
+
+| dist-tag | version | Elysia |
+|---|---|---|
+| `latest` | `0.1.x` | 1.4.x |
+| `next` | `2.0.x-beta.N` | 2.0.0-beta.x |
+
+`npm i @extend-therapy/elysia-external-session` gets the 1.4-compatible build;
+`@next` gets the 2.0 one.
+
+**Breaking on the 2.0 line:** the `scope` config value `"scoped"` is now `"plugin"`, following
+Elysia 2.0's `.derive(scope, fn)` vocabulary. Note `scope` remains inert — see the note on
+`SessionHandlerConfig`.

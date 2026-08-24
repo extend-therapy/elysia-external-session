@@ -16,7 +16,16 @@ export interface SessionHandlerConfig<T, U extends BaseStore<T> = BaseStore<T>> 
   decrypt?: (value: string) => Promise<string | null>;
   cookieOptions?: CookieOptions;
   cookieName?: string;
-  scope: "global" | "scoped";
+  /**
+   * NOTE: currently inert -- nothing in `src/` reads this. `SessionPlugin`
+   * hardcodes `.derive("global", ...)`. Kept (rather than removed) because it is
+   * part of the published config type; renamed `"scoped"` -> `"plugin"` in 2.0 to
+   * match Elysia's vocabulary. Deliberately NOT wired up as part of the 2.0
+   * migration: anyone passing `"plugin"` today gets global behaviour, and making
+   * the option suddenly take effect would break them under cover of a framework
+   * bump.
+   */
+  scope: "global" | "plugin";
 }
 
 export class SessionHandler<T, U extends BaseStore<T>> {

@@ -48,13 +48,17 @@ app
   .get("/", (ctx) => {
     return `Hello World no session ${ctx.sessionId}`;
   })
+  // Elysia 2.0 flipped the route argument order: the hook object now comes
+  // BEFORE the handler. Passing them the 1.x way round is silently wrong rather
+  // than a type error -- the hook object lands in the handler slot, so the guard
+  // never runs and the route answers 200 with an empty body.
   .post(
     "/auth",
-    () => {
-      return { success: true, message: "You may access this page" };
-    },
     {
       beforeHandle: requiresSessionWithUser,
+    },
+    () => {
+      return { success: true, message: "You may access this page" };
     },
   )
   .post("/login", async (ctx) => {

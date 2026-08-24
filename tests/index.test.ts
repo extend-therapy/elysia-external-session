@@ -50,7 +50,7 @@ describe("Elysia Session Plugin Integration", () => {
         SessionPlugin({
           store,
           cookieName: "scoped-session",
-          scope: "scoped",
+          scope: "plugin",
         }),
       )
       .get("/get", ({ session, sessionId }) => {
