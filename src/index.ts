@@ -84,7 +84,7 @@ function SessionPlugin<T, U extends BaseStore<T>>(config: SessionHandlerConfig<T
     // to the context *type*, and consumers rely on `ctx.session` being typed.
     // `derive` then republishes the stash, which is cheap because the work is
     // already done.
-    .transform("global", async (ctx) => {
+    .onTransform("global", async (ctx) => {
       const cookieString = readRawCookie(
         ctx.request.headers.get("cookie"),
         sessionHandler.getCookieName(),
