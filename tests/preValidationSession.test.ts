@@ -34,6 +34,13 @@ const store = new SqliteStore<Sess>({
 
 const app = new Elysia()
   .use(SessionPlugin<Sess, typeof store>({ name: COOKIE_NAME, store, scope: "global" }))
+  // Before the routes: from 2.0.0-beta.30 a local `onError` covers only routes
+  // registered after it.
+  .onError(({ error }: any) =>
+    error?.isAuth
+      ? new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 })
+      : undefined,
+  )
   .post("/mint", async (ctx: any) => ({
     cookie: ctx.sessionHandler.createCookieString(
       await ctx.sessionHandler.createSession({ session: { user: "alice" } }),
@@ -42,17 +49,12 @@ const app = new Elysia()
   .guard({}, guarded =>
     guarded
       // Pre-validation guard, the thing this test exists for.
-      .transform((ctx: any) => {
+      .onTransform((ctx: any) => {
         if (!ctx.session?.user) {
           throw Object.assign(new Error("Unauthorized"), { isAuth: true });
         }
       })
       .post("/t", { body: Type.Object({ needed: Type.String() }) }, () => ({ ok: true })),
-  )
-  .error(({ error }: any) =>
-    error?.isAuth
-      ? new Response(JSON.stringify({ message: "Unauthorized" }), { status: 401 })
-      : undefined,
   );
 
 let cookieHeader = "";
